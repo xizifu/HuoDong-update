@@ -10,6 +10,7 @@ import WeChatkill from './WeChatkill.js';
 import MX_feihongyinxue from './MX_feihongyinxue.js';
 import MiNiAppkill from './MiNiAppkill.js';
 import huodongcharacter from './huodongcharacter.js';
+import { updateHuodongFromMain } from '../config.js';
 
 export async function precontent(bilibilicharacter) {
     //清空在线更新后的活动武将缓存
@@ -46,10 +47,15 @@ export async function precontent(bilibilicharacter) {
         };
         try {
             alert('检测到上次扩展更新未完成，正在处理残留文件...');
+            const state = lib.config['extension_活动武将_update_state'];
             const backupFiles = await listFiles('extension/活动武将/update_backup');
             if (backupFiles.length) {
                 await copyFiles('extension/活动武将/update_backup', 'extension/活动武将', backupFiles);
                 alert('已从备份恢复旧版本扩展');
+            }
+            const newFiles = Array.isArray(state.newFiles) ? state.newFiles : [];
+            for (const file of newFiles) {
+                await game.promises.removeFile(`extension/活动武将/${file}`).catch(() => { });
             }
             await game.promises.removeDir('extension/活动武将/update_temp').catch(() => { });
             await game.promises.removeDir('extension/活动武将/update_backup').catch(() => { });
@@ -62,6 +68,7 @@ export async function precontent(bilibilicharacter) {
             alert('扩展更新残留清理失败，请手动检查update_temp和update_backup目录');
         }
     })();
+    await updateHuodongFromMain({ automatic: true });
     //存储活动武将扩展的文件和文件夹分布
     _status['extension_活动武将_files'] = await (async () => {
         const getFileList = async function (path = 'extension/活动武将') {
