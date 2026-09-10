@@ -35147,27 +35147,11 @@ const packs = function () {
                             return control === '失去体力' || ui.selected.targets.every(target => target.isDamaged());
                         },
                         ai1(target) {
-                            const player = get.player(), min = player.countMark('minijishi');
-                            const targets1 = game.filterPlayer(current => {
-                                return current.isDamaged() && get.recoverEffect(current, player, player) > 0;
-                            }).sort((a, b) => get.recoverEffect(b, player, player) - get.recoverEffect(a, player, player)).slice(0, min);
-                            const targets2 = game.filterPlayer(current => {
-                                return get.effect(target, { name: 'losehp' }, player, player) > 0;
-                            }).sort((a, b) => get.effect(b, { name: 'losehp' }, player, player) - get.effect(a, { name: 'losehp' }, player, player)).slice(0, min);
-                            const goon = targets1.reduce((sum, current) => {
-                                return sum + get.recoverEffect(current, player, player);
-                            }, 0) > targets2.reduce((sum, current) => {
-                                return sum + get.effect(current, { name: 'losehp' }, player, player);
-                            }, 0);
-                            return goon ? get.recoverEffect(target, player, player) : get.effect(target, { name: 'losehp' }, player, player);
+                            const player = get.player();
+                            return get.effect(target, { name: 'losehp' }, player, player);
                         },
                         ai2() {
-                            const player = get.player(), targets = ui.selected.targets;
-                            return targets.reduce((sum, current) => {
-                                return sum + get.recoverEffect(current, player, player);
-                            }, 0) > targets.reduce((sum, current) => {
-                                return sum + get.effect(current, { name: 'losehp' }, player, player);
-                            }, 0) ? 0 : 1;
+                            return 1;
                         },
                     }).forResult();
                     if (result?.bool) {
