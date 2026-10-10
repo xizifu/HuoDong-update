@@ -41252,23 +41252,31 @@ const packs = function () {
                     /** @type {GameData} */
                     const gameData = lastGameData || new GameData(MAPS.randomGet());
                     const videoId = lib.status.videoId++;
+                    //主视角是不是活人：人机/托管由主机自己走棋
+                    const ownerIsHuman = player.isMine() || player.isOnline();
+                    const playerName = get.translation(player);
 
-                    function createUI(videoId, gameWidth, gameHeight, gameMap, NAMES) {
+                    //======================== 各端共用的界面 ========================
+                    function createStage(videoId, gameWidth, gameHeight, chars, startX, startY, ownerIsHuman) {
                         const dialog = ui.create.dialog('曹丕登阶Demo', 'forcebutton');
                         dialog.videoId = videoId;
-                        dialog.addText('等待开始...');
                         dialog.classList.add('dengjie-game');
 
-                        const gameContainer = ui.create.div(dialog.content);
+                        const gameContainer = ui.create.div('.dengjie-game-container', dialog.content);
                         const table = document.createElement('table');
                         table.classList.add('dengjie-game');
                         gameContainer.appendChild(table);
 
-                        const tips = dialog.content.children[1].firstElementChild;
-                        tips.id = 'dengjie-tips';
+                        //提示行自己建一条放在最后面，CSS 的 div:last-child 正好管它喵
+                        const tips = ui.create.div('.text center', '等待开始...', dialog.content);
+                        tips.classList.add('dengjie-tips');
 
-                        function remoteGetSlotFromPos(x, y, width) {
-                            return x + y * width;
+                        function cellId(x, y) {
+                            return `dengjie-cell-${videoId}-${x}-${y}`;
+                        }
+
+                        function getCell(x, y) {
+                            return document.getElementById(cellId(x, y));
                         }
 
                         function createCharacter(name, score) {
@@ -41279,7 +41287,7 @@ const packs = function () {
                             }
                             button.classList.add('noclick');
 
-                            if (name !== NAMES[0]) {
+                            if (name !== 'caopi') {
                                 const scoreDiv = ui.create.div('.score');
                                 scoreDiv.innerHTML = Math.abs(score);
 
@@ -41295,29 +41303,32 @@ const packs = function () {
                             return button;
                         }
 
-                        function buildNodes() {
-                            for (let y = 0; y < gameHeight; y++) {
-                                const tr = document.createElement('tr');
-                                table.appendChild(tr);
+                        for (let y = 0; y < gameHeight; y++) {
+                            const tr = document.createElement('tr');
+                            table.appendChild(tr);
 
-                                for (let x = 0; x < gameWidth; x++) {
-                                    const td = document.createElement('td');
-                                    td.classList.add('dengjie-game');
-                                    td.id = `dengjie-cell-${x}-${y}`;
-                                    tr.appendChild(td);
-
-                                    const slot = remoteGetSlotFromPos(x, y, gameWidth);
-                                    const data = gameMap[slot];
-
-                                    if (Array.isArray(data)) {
-                                        const button = createCharacter(NAMES[data[0]], data[1]);
-                                        td.appendChild(button);
-                                    }
-                                }
+                            for (let x = 0; x < gameWidth; x++) {
+                                const td = document.createElement('td');
+                                td.classList.add('dengjie-game');
+                                td.id = cellId(x, y);
+                                tr.appendChild(td);
                             }
                         }
 
-                        buildNodes();
+                        //棋子就用曹丕自己那张牌喵
+                        const token = createCharacter('caopi', 0);
+                        token.classList.add('dengjie-token');
+                        getCell(startX, startY).appendChild(token);
+
+                        //其他目标角色喵
+                        const charNodes = {};
+
+                        for (const [x, y, name, score] of chars) {
+                            const button = createCharacter(name, score);
+                            getCell(x, y).appendChild(button);
+                            charNodes[name] = button;
+                        }
+
                         dialog.open();
 
                         const width = dialog.clientWidth + 1;
@@ -41325,30 +41336,143 @@ const packs = function () {
                         dialog.style.left = `calc(50% - ${width / 2}px)`;
                         dialog.style.height = 'auto';
                         dialog.style.minHeight = 'max-content';
+
+                        //各端自己的显示状态喵：画面完全跟着主机发来的快照走
+                        const stage = {
+                            dialog: dialog,
+                            tips: tips,
+                            token: token,
+                            charNodes: charNodes,
+                            pos: [startX, startY],
+                            arrows: [],
+                            info: null,
+                            timer: null,
+                            closed: false,
+                        };
+
+                        function clearArrows() {
+                            for (const item of stage.arrows) {
+                                item.node.remove();
+                                item.cell.classList.remove('selectable');
+                            }
+                            stage.arrows.length = 0;
+                        }
+
+                        function buildArrow(x, y, score) {
+                            const cell = getCell(x, y);
+                            const container = ui.create.div('.arrow-container');
+                            const arrow = ui.create.div('.arrow');
+                            const extraClass = score == 0 ? 'old' : score > 0 ? 'new-gain' : 'new-lose';
+                            arrow.innerHTML = (score != 0 ? (score > 0 ? '+' : '-') : '') + Math.abs(score);
+                            container.appendChild(arrow);
+                            container.classList.add(extraClass);
+                            cell.appendChild(container);
+                            cell.classList.add('selectable');
+                            stage.arrows.push({ node: container, cell: cell });
+                        }
+
+                        //提示行：分数和剩余时间会自己走秒，不用等下一步喵
+                        function refreshTips() {
+                            const info = stage.info;
+                            if (!info || stage.closed) return;
+
+                            if (info.mode === 'end') {
+                                stage.tips.innerHTML = info.tips || '';
+                                return;
+                            }
+
+                            const left = Math.max(0, info.showTime ? info.timeLeft - (Date.now() - info.at) : info.timeLeft);
+                            const head = info.mode === 'ai' ? `${info.name}的登阶（人机）　` : '';
+                            stage.tips.innerHTML = `${head}分数：${info.score}　剩余时间：${Math.ceil(left / 1000)} 秒`;
+                        }
+
+                        //收到主机的一帧画面喵
+                        stage.applyRender = function (data) {
+                            if (stage.closed || !data) return;
+
+                            //棋子挪过去（带点动画）
+                            if (data.x != stage.pos[0] || data.y != stage.pos[1]) {
+                                stage.pos = [data.x, data.y];
+                                game.$elementGoto(stage.token, getCell(data.x, data.y), 'first', 300, 'ease-in-out');
+                            }
+
+                            //被打败的角色牌摘掉
+                            for (const name of Object.keys(stage.charNodes)) {
+                                if (!data.chars.some(item => item[2] === name)) {
+                                    stage.charNodes[name].remove();
+                                    delete stage.charNodes[name];
+                                }
+                            }
+
+                            //只有相邻格子能看见分数喵
+                            clearArrows();
+                            for (const [x, y, score] of data.arrows || []) {
+                                buildArrow(x, y, score);
+                            }
+
+                            stage.info = {
+                                mode: data.mode || '',
+                                name: data.name || '',
+                                score: data.score,
+                                timeLeft: data.timeLeft,
+                                showTime: !!data.showTime,
+                                tips: data.tips || '',
+                                at: Date.now(),
+                            };
+                            refreshTips();
+                        };
+
+                        dialog._dengjie = stage;
+                        //每0.25秒走一下秒表喵
+                        stage.timer = setInterval(refreshTips, 250);
+
+                        //各端共用的消息（同步画面和关闭），只在本局使用
+                        lib.message.client.dengjie = function (type, id, data) {
+                            let dialog = null;
+                            for (const item of document.querySelectorAll('.dialog.dengjie-game')) {
+                                if (item.videoId == id) dialog = item;
+                            }
+                            const stage = dialog && dialog._dengjie;
+                            if (!stage) return;
+                            if (type === 'render') {
+                                stage.applyRender(data);
+                                return;
+                            }
+                            if (type === 'close') {
+                                if (data && _status.connectMode && lib.configOL) lib.configOL.choose_timeout = data;
+                                delete lib.message.client.dengjie;
+                                stage.closed = true;
+                                if (stage.timer) clearInterval(stage.timer);
+                                stage.dialog.delete();
+                            }
+                        };
                     }
 
-                    let isAI = false;
+                    //人机或者一开始就托管的话，主机自己走
+                    let isAI = !ownerIsHuman;
+                    //棋子初始位置（第一局在曹丕格，之后从上一局的终点开始）
+                    const tokenSlot = gameData.x < 0 || gameData.y < 0 ? gameData.names.caopi : gameData.getSlotFromPos(gameData.x, gameData.y);
+                    const { x: startX, y: startY } = gameData.getPosFromSlot(tokenSlot);
 
-                    if (player.isOnline()) {
-                        player.send(createUI, videoId, gameData.width, gameData.height, gameData.map, NAMES);
-                    } else if (player.isMine()) {
-                        createUI(videoId, gameData.width, gameData.height, gameData.map, NAMES);
-                    } else {
-                        isAI = true;
+                    //场上的角色格喵（曹丕自己那张不算）
+                    const stageChars = [];
+                    for (let slot = 0; slot < gameData.map.length; slot++) {
+                        const data = gameData.map[slot];
+                        if (Array.isArray(data) && data[0] !== 0) {
+                            const pos = gameData.getPosFromSlot(slot);
+                            stageChars.push([pos.x, pos.y, NAMES[data[0]], data[1]]);
+                        }
                     }
 
                     const originalTimeout = lib.configOL.choose_timeout;
 
-                    game.broadcastAll(function (player, videoId) {
+                    //所有人看到的都是同一张桌子喵
+                    game.broadcastAll(createStage, videoId, gameData.width, gameData.height, stageChars, startX, startY, ownerIsHuman);
+                    game.broadcastAll(function () {
                         if (_status.connectMode) {
                             lib.configOL.choose_timeout = '30';
                         }
-                        if (game.me !== player) {
-                            const dialog = ui.create.dialog(`${get.translation(player)}正在进行登阶...`);
-                            dialog.videoId = videoId;
-                            dialog.open();
-                        }
-                    }, player, videoId);
+                    });
 
                     //游戏主逻辑
                     const initialData = new GameData(gameData); //备份当前的数据以便失败时回滚喵
@@ -41362,8 +41486,9 @@ const packs = function () {
                         }
                     }
 
-                    function getTableCell(x, y) {
-                        return document.getElementById(`dengjie-cell-${x}-${y}`);
+                    //按本局的 id 找格子喵（同一端可能留着好几局的桌子）
+                    function getTableCell(id, x, y) {
+                        return document.getElementById(`dengjie-cell-${id}-${x}-${y}`);
                     }
 
                     function* walkNearCells(x, y) {
@@ -41395,51 +41520,65 @@ const packs = function () {
                         }
                     }
 
-                    //啊本来是准备做箭头的喵，但是后面感觉直接放收益更好哦喵
-                    function buildArrow(x, y, score) {
-                        const container = ui.create.div('.arrow-container');
-                        const arrow = ui.create.div('.arrow');
-                        const extraClass = score == 0 ? 'old' : (score > 0 ? 'new-gain' : 'new-lose');
-                        arrow.innerHTML = (score != 0 ? (score > 0 ? '+' : '-') : '') + Math.abs(score);
-                        container.appendChild(arrow);
-                        container.classList.add(extraClass);
-                        return container;
+                    //======================== 主机：状态与广播 ========================
+                    const sleep = time => new Promise(resolve => setTimeout(resolve, time));
+                    //整局的时限：棋盘铺好那一刻开始走，跟点格子、移动统统无关，只减不增喵
+                    const gameTimeLimit = 30000;
+                    let gameStart = 0;
+
+                    //这一局还剩多少毫秒（全场都按这个显示，谁看都一样）
+                    function restTime() {
+                        if (!gameStart) gameStart = Date.now();
+                        return Math.max(0, gameTimeLimit - (Date.now() - gameStart));
                     }
 
-                    function buildArrowRemote(x, y) {
-                        const score = getCellScore(x, y);
+                    //一步能不能走（和 finishStep 的判定保持一致）
+                    function canStep(x, y, score) {
+                        const data = gameData.map[gameData.getSlotFromPos(x, y)];
+                        if (Array.isArray(data)) return score > Math.abs(data[1]); //角色格：分够就是赢
+                        return score > -data; //红格要分数 > 1
+                    }
 
-                        if (player.isMine()) {
-                            const cell = getTableCell(x, y);
-                            const container = buildArrow(x, y, score);
-                            cell.appendChild(container);
-                            cell.classList.add('selectable');
-                        } else if (player.isOnline()) {
-                            player.send(function (x, y, score, buildArrow, getTableCell) {
-                                const container = buildArrow(x, y, score);
-                                const cell = getTableCell(x, y);
-                                cell.appendChild(container);
-                                cell.classList.add('selectable');
-                            }, x, y, score, buildArrow, getTableCell);
+                    //把当前局面整理成一份给所有视角的快照喵（pos 只用来改棋子的显示位置）
+                    function buildState(showArrows, pos) {
+                        const arrows = [];
+                        const px = pos ? pos[0] : gameData.x;
+                        const py = pos ? pos[1] : gameData.y;
+
+                        if (showArrows) {
+                            for (const [, x, y] of walkNearCells(px, py)) {
+                                arrows.push([x, y, getCellScore(x, y)]);
+                            }
                         }
-                    }
 
-                    function clearArrow(cell) {
-                        cell.querySelector('.arrow-container')?.remove();
-                    }
-
-                    function clearArrowRemote([x, y]) {
-                        if (player.isMine()) {
-                            const cell = getTableCell(x, y);
-                            clearArrow(cell);
-                            cell.classList.remove('selectable');
-                        } else if (player.isOnline()) {
-                            player.send(function (x, y, clearArrow, getTableCell) {
-                                const cell = getTableCell(x, y);
-                                clearArrow(cell);
-                                cell.classList.remove('selectable');
-                            }, x, y, clearArrow, getTableCell);
+                        const chars = [];
+                        for (let slot = 0; slot < gameData.map.length; slot++) {
+                            const data = gameData.map[slot];
+                            if (Array.isArray(data) && data[0] !== 0) {
+                                const charPos = gameData.getPosFromSlot(slot);
+                                chars.push([charPos.x, charPos.y, NAMES[data[0]], data[1]]);
+                            }
                         }
+
+                        return {
+                            x: px,
+                            y: py,
+                            score: gameData.score,
+                            timeLeft: restTime(),
+                            arrows: arrows,
+                            chars: chars,
+                            tips: '',
+                        };
+                    }
+
+                    //mode: 'human'（等主视角点格子，秒表在走）/ 'ai'（人机在走）/ 'end'（结算提示）
+                    function broadcastState(mode, showArrows, tips, pos) {
+                        const data = buildState(showArrows, pos);
+                        data.mode = mode;
+                        data.name = playerName;
+                        data.showTime = mode !== 'end';
+                        data.tips = tips || '';
+                        game.broadcastAll('dengjie', 'render', videoId, data);
                     }
 
                     function markWalked(x, y) {
@@ -41449,18 +41588,8 @@ const packs = function () {
                         const data = gameData.map[slot];
 
                         if (Array.isArray(data)) {
-                            const name = NAMES[data[0]];
-                            delete gameData.names[name];
-
-                            if (player.isMine()) {
-                                const cell = getTableCell(x, y);
-                                cell.querySelector('.button')?.remove();
-                            } else if (player.isOnline()) {
-                                player.send(function (x, y, getTableCell) {
-                                    const cell = getTableCell(x, y);
-                                    cell.querySelector('.button')?.remove();
-                                }, x, y, getTableCell);
-                            }
+                            //角色被打败了就记一笔，画面交给快照同步喵
+                            delete gameData.names[NAMES[data[0]]];
                         }
 
                         gameData.map[slot] = 0;
@@ -41470,8 +41599,10 @@ const packs = function () {
                         function waitCellClickCore(cells) {
                             const eventName = lib.config.touchscreen ? 'touchend' : 'click';
                             const { promise, resolve } = Promise.withResolvers();
+                            let stopped = false;
 
                             function clearHandler() {
+                                stopped = true;
                                 cells.forEach(cell => cell.removeEventListener(eventName, clickHandler));
                             }
 
@@ -41483,6 +41614,19 @@ const packs = function () {
 
                             cells.forEach(cell => cell.addEventListener(eventName, clickHandler));
 
+                            //中途托管就别再等点击了喵
+                            (async function watchAuto() {
+                                while (!stopped) {
+                                    if (_status.auto) {
+                                        resolve('ai');
+                                        clearHandler();
+                                        return;
+                                    }
+
+                                    await new Promise(resolve => setTimeout(resolve, 150));
+                                }
+                            })();
+
                             game.countChoose();
                             _status.noclearcountdown = 'direct';
                             return promise;
@@ -41492,7 +41636,7 @@ const packs = function () {
                             const cells = [];
 
                             for (const [x, y] of locations) {
-                                const cell = getTableCell(x, y);
+                                const cell = getTableCell(id, x, y);
                                 cells.push(cell);
                             }
 
@@ -41534,47 +41678,96 @@ const packs = function () {
 
                             return promise;
                         } else if (player.isMine()) {
-                            return waitCellClickCore(locations.map(([x, y]) => getTableCell(x, y)));
+                            return waitCellClickCore(locations.map(([x, y]) => getTableCell(videoId, x, y)));
                         }
                     }
 
-                    function setTips(text) {
-                        if (player.isOnline()) {
-                            player.send(text => {
-                                const tips = document.getElementById('dengjie-tips');
+                    //人机/托管：主机自己走（真正的开关是 _status.auto / player.isAuto，取消托管也会立刻交还操作权）
+                    function isAIPlaying() {
+                        if (isAI) return true;
+                        if (player.isAuto) return true;
+                        if (player == game.me && _status.auto) return true;
+                        return false;
+                    }
 
-                                if (tips) {
-                                    tips.innerHTML = text;
-                                }
-                            }, text);
-                        } else if (player.isMine()) {
-                            const tips = document.getElementById('dengjie-tips');
+                    //AI 想一步的工夫：只是让大家看清人机在走哪，时间由整局时限自己走喵
+                    async function aiThinkDelay() {
+                        await sleep(aiDelay);
+                        if (restTime() <= 0) throw 'timeout';
+                    }
 
-                            if (tips) {
-                                tips.innerHTML = text;
+                    //等一步输入：活人点格子，人机/托管交给AI（途中托管/取消托管都立刻生效）
+                    async function nextStepInput() {
+                        let autoTries = 0;
+
+                        while (true) {
+                            const nextCells = [];
+
+                            for (const [, x, y] of walkNearCells(gameData.x, gameData.y)) {
+                                nextCells.push([x, y]);
                             }
+
+                            //托管中：主机自己走，AI 想这一步的工夫也照走时间喵
+                            if (isAIPlaying()) {
+                                broadcastState('ai', true);
+                                await aiThinkDelay();
+
+                                //等一下的功夫里人可能取消了托管，那就把这一步让回去
+                                if (isAIPlaying()) {
+                                    const step = aiChooseStep();
+                                    if (!step) throw 'nowin';
+                                    return step;
+                                }
+                            }
+
+                            //操作权在人手里：清掉AI之前盯的目标，免得下次托管接着走旧路线喵
+                            aiPlan = null;
+                            //整局时限一直在走，广播里带上此刻的剩余时间喵
+                            broadcastState('human', true);
+
+                            let index;
+                            let waiting = true;
+
+                            try {
+                                //活人点格子；整局时间到了算失败，中途托管就交给AI
+                                const remain = restTime();
+                                const timeout = sleep(remain + 50).then(() => 'timeout');
+                                //兜底：万一托管信号没走到点击那边，主机这边也别干等
+                                const autoWatch = (async () => {
+                                    while (waiting && !isAIPlaying()) {
+                                        await sleep(150);
+                                    }
+                                    return 'auto';
+                                })();
+                                const result = await Promise.race([waitCellClick(nextCells), timeout, autoWatch]);
+                                waiting = false;
+
+                                if (result === 'timeout') throw 'timeout';
+                                if (result === 'auto' || result === 'ai') throw 'auto';
+                                index = result;
+                            } catch (e) {
+                                waiting = false;
+
+                                //托管引起的中断就回去重判一次（可能又被取消了），其它错误照常失败
+                                if (e === 'auto') {
+                                    //客机一直说它托管了、主机却没收到标记（比如重连），那就直接让AI接手
+                                    if (++autoTries >= 3) {
+                                        await aiThinkDelay();
+                                        const step = aiChooseStep();
+                                        if (!step) throw 'nowin';
+                                        return step;
+                                    }
+                                    await sleep(150);
+                                    continue;
+                                }
+                                throw e;
+                            }
+
+                            //这一局的30秒用完就不算数了（跟点哪一格没关系）喵
+                            if (restTime() <= 0) throw 'timeout';
+                            gameData.steps++;
+                            return nextCells[index];
                         }
-                    }
-
-                    async function waitNextStep() {
-                        const px = gameData.x, py = gameData.y;
-                        const nextCells = [];
-
-                        for (const [_, x, y] of walkNearCells(px, py)) {
-                            buildArrowRemote(x, y);
-                            nextCells.push([x, y]);
-                        }
-
-                        setTips(`请选择下一步方向 (分数: ${gameData.score})`);
-
-                        const now = new Date();
-                        const index = await waitCellClick(nextCells);
-                        gameData.time += new Date() - now;
-                        gameData.steps++;
-                        nextCells.forEach(item => {
-                            clearArrowRemote(item);
-                        });
-                        return nextCells[index];
                     }
 
                     function finishStep(x, y) {
@@ -41610,103 +41803,182 @@ const packs = function () {
                         return [true, win];
                     }
 
+                    //走一步：位置先定下来，动画交给各端自己播喵
                     async function movePlayer(x, y) {
-                        const px = gameData.x;
-                        const py = gameData.y;
-
                         gameData.x = x;
                         gameData.y = y;
-
-                        function movePlayerCore(x, y, px, py, getTableCell) {
-                            function asyncAnimate(element, keyframes, options) {
-                                return new Promise(function (resolve, reject) {
-                                    const animation = element.animate(keyframes, options);
-                                    animation.onfinish = resolve;
-                                });
-                            }
-
-                            const targetChess = getTableCell(px, py).querySelector(".button");
-                            const targetCell = getTableCell(x, y);
-
-                            (async () => {
-                                await asyncAnimate(targetChess, [
-                                    { transform: 'scale(1)' },
-                                    { transform: 'scale(1.25)' },
-                                ], {
-                                    duration: 100,
-                                    fill: 'forwards',
-                                });
-                                await game.$elementGoto(targetChess, targetCell, 'first', 300, 'ease-in-out');
-                                await asyncAnimate(targetChess, [
-                                    { transform: 'scale(1.25)' },
-                                    { transform: 'scale(1)' },
-                                ], {
-                                    duration: 100,
-                                    fill: 'forwards',
-                                });
-                            })();
-                        }
-
-                        if (player.isMine()) {
-                            movePlayerCore(x, y, px, py, getTableCell);
-                        } else if (player.isOnline()) {
-                            player.send(movePlayerCore, x, y, px, py, getTableCell);
-                        }
-
-                        //等待500ms后动画过去哦
-                        await new Promise(resolve => setTimeout(resolve, 500));
+                        broadcastState(isAIPlaying() ? 'ai' : 'human', true);
+                        await sleep(240);
                     }
 
+                    //失败：棋子退回本次登阶的起点（只改画面，游戏数据一点不动喵）
                     async function rollbackPlayer() {
-                        const px = gameData.x;
-                        const py = gameData.y;
+                        broadcastState(isAIPlaying() ? 'ai' : 'human', true, '', [initialData.x, initialData.y]);
+                        await sleep(240);
+                    }
 
-                        function rollbackPlayerCore(x, y, px, py, getTableCell) {
-                            function asyncAnimate(element, keyframes, options) {
-                                return new Promise(function (resolve, reject) {
-                                    const animation = element.animate(keyframes, options);
-                                    animation.onfinish = resolve;
-                                });
+                    //======================== 主机的AI：尽量多拿分再收尾 ========================
+                    const aiDelay = 200;    //每步停顿一下，让大家看清人机在走哪
+                    let aiPlan = null;      //当前盯着的目标，粘住目标免得来回横跳
+
+                    //找一条从 (sx,sy) 到 (tx,ty) 的路：踩红格算1点代价，角色格不能路过（终点除外）
+                    function findPath(sx, sy, tx, ty) {
+                        const key = (x, y) => x + ',' + y;
+                        const cost = {};
+                        const prev = {};
+                        const rest = [];
+
+                        for (let y = 0; y < gameData.height; y++) {
+                            for (let x = 0; x < gameData.width; x++) {
+                                const data = gameData.map[gameData.getSlotFromPos(x, y)];
+                                //角色格不能路过（终点除外）
+                                if (Array.isArray(data) && !(x === tx && y === ty)) continue;
+                                cost[key(x, y)] = Infinity;
+                                rest.push([x, y]);
+                            }
+                        }
+
+                        if (cost[key(sx, sy)] === undefined || cost[key(tx, ty)] === undefined) return null;
+
+                        cost[key(sx, sy)] = 0;
+
+                        while (rest.length) {
+                            let pick = 0;
+                            for (let i = 1; i < rest.length; i++) {
+                                if (cost[key(rest[i][0], rest[i][1])] < cost[key(rest[pick][0], rest[pick][1])]) pick = i;
                             }
 
-                            const targetChess = getTableCell(px, py).querySelector('.button');
-                            const targetCell = getTableCell(x, y);
+                            const [cx, cy] = rest.splice(pick, 1)[0];
+                            const cur = cost[key(cx, cy)];
 
-                            const promise = (async () => {
-                                await asyncAnimate(targetChess, [
-                                    { transform: 'scale(1)' },
-                                    { transform: 'scale(0)' },
-                                ], {
-                                    duration: 100,
-                                    fill: 'forwards',
-                                });
-                                await new Promise(resolve => setTimeout(resolve, 100));
+                            if (cur === Infinity) break;
+                            if (cx === tx && cy === ty) break;
 
-                                const first = targetCell.firstChild;
-                                if (first) {
-                                    targetCell.insertBefore(targetChess, targetCell.firstChild);
-                                } else {
-                                    targetCell.appendChild(targetChess);
+                            for (const [, dx, dy] of NEIGHBORS) {
+                                const nx = cx + dx;
+                                const ny = cy + dy;
+                                const nk = key(nx, ny);
+
+                                if (cost[nk] === undefined) continue;
+
+                                const data = gameData.map[gameData.getSlotFromPos(nx, ny)];
+                                const step = typeof data === 'number' && data < 0 ? 1 : 0;    //踩红格多花1分
+                                const next = cur + step;
+
+                                if (next < cost[nk]) {
+                                    cost[nk] = next;
+                                    prev[nk] = [cx, cy];
                                 }
-
-                                await asyncAnimate(targetChess, [
-                                    { transform: 'scale(0)' },
-                                    { transform: 'scale(1)' },
-                                ], {
-                                    duration: 100,
-                                    fill: 'forwards',
-                                });
-                            })();
+                            }
                         }
 
-                        if (player.isMine()) {
-                            rollbackPlayerCore(initialData.x, initialData.y, px, py, getTableCell);
-                        } else if (player.isOnline()) {
-                            player.send(rollbackPlayerCore, initialData.x, initialData.y, px, py, getTableCell);
+                        if (sx === tx && sy === ty) return [[sx, sy]];
+                        if (prev[key(tx, ty)] === undefined) return null;
+
+                        const path = [[tx, ty]];
+                        let cur = key(tx, ty);
+
+                        while (prev[cur]) {
+                            const [px, py] = prev[cur];
+                            path.unshift([px, py]);
+                            cur = key(px, py);
                         }
 
-                        //等待300ms后动画过去哦
-                        await new Promise(resolve => setTimeout(resolve, 300));
+                        return path;
+                    }
+
+                    //按真实规则走一遍路线，看看最后能落到多少分（走过的格子已经变灰，只算一次）
+                    function evalPath(path, score) {
+                        const taken = new Set();
+                        let cur = score;
+
+                        for (let i = 1; i < path.length; i++) {
+                            const [x, y] = path[i];
+                            const k = x + ',' + y;
+                            const raw = gameData.map[gameData.getSlotFromPos(x, y)];
+
+                            if (Array.isArray(raw)) return null;    //角色格不能路过
+
+                            let delta = raw;
+                            if (delta === 1 && taken.has(k)) delta = 0;    //蓝格走过就变灰，重复走不加分
+                            if (delta === 1) taken.add(k);
+                            if (cur <= -delta) return null;    //红格要分数 > 1
+
+                            cur += delta;
+                        }
+
+                        return cur;
+                    }
+                    //给AI挑一步：先把能白赚的分捡完，再去吃吃得起、要求最高的角色
+                    function aiChooseStep() {
+                        const score = gameData.score;
+                        const sx = gameData.x;
+                        const sy = gameData.y;
+
+                        //沿着已经定好的路线继续走
+                        if (aiPlan) {
+                            const target = gameData.map[gameData.getSlotFromPos(aiPlan.x, aiPlan.y)];
+                            const alive = aiPlan.kind === 'char' ? Array.isArray(target) : target === 1;
+                            const index = alive ? aiPlan.path.findIndex(item => item[0] === sx && item[1] === sy) : -1;
+
+                            if (index >= 0 && index + 1 < aiPlan.path.length) {
+                                const [nx, ny] = aiPlan.path[index + 1];
+                                if (canStep(nx, ny, score)) return [nx, ny];
+                            }
+
+                            aiPlan = null;
+                        }
+
+                        const plans = [];
+
+                        //1. 分数（连顺路能吃的蓝格一起算）已经够吃某个角色了，就直接去吃
+                        for (let y = 0; y < gameData.height; y++) {
+                            for (let x = 0; x < gameData.width; x++) {
+                                const data = gameData.map[gameData.getSlotFromPos(x, y)];
+                                if (!Array.isArray(data) || data[0] === 0) continue;    //曹丕自己那张不算
+                                if (x === sx && y === sy) continue;
+
+                                const path = findPath(sx, sy, x, y);
+                                if (!path || path.length < 2) continue;
+
+                                const before = evalPath(path.slice(0, -1), score);    //走到角色门口时的分数
+                                if (before === null || before <= Math.abs(data[1])) continue;    //吃不起
+
+                                plans.push({ kind: 'char', x: x, y: y, path: path, len: path.length, need: Math.abs(data[1]), delta: data[1] });
+                            }
+                        }
+
+                        //吃角色的顺序：先吃加分的（吃最近的），再吃掉分的（先吃代价小的）
+                        plans.sort((a, b) => {
+                            if ((a.delta > 0) !== (b.delta > 0)) return a.delta > 0 ? -1 : 1;
+                            if (a.delta > 0) return a.len - b.len;
+                            return a.need - b.need;
+                        });
+
+                        //2. 还吃不起谁，就先去捡净赚分的蓝格，攒够了下一步就去吃
+                        if (!plans.length) {
+                            for (let y = 0; y < gameData.height; y++) {
+                                for (let x = 0; x < gameData.width; x++) {
+                                    if (gameData.map[gameData.getSlotFromPos(x, y)] !== 1) continue;
+                                    if (x === sx && y === sy) continue;
+
+                                    const path = findPath(sx, sy, x, y);
+                                    if (!path || path.length < 2) continue;
+
+                                    const after = evalPath(path, score);
+                                    if (after === null || after <= score) continue;    //不赚分的就不绕路
+
+                                    plans.push({ kind: 'blue', x: x, y: y, path: path, len: path.length, gain: after - score });
+                                }
+                            }
+
+                            plans.sort((a, b) => (b.gain - a.gain) || (a.len - b.len));
+                        }
+
+                        if (!plans.length) return null;
+
+                        aiPlan = plans[0];
+                        return aiPlan.path[1];
                     }
 
                     const {
@@ -41715,8 +41987,6 @@ const packs = function () {
                     } = Promise.withResolvers();
 
                     function onGameWin(name) {
-                        setTips('本次登阶成功!');
-
                         //清空走过的红色块
                         for (const slot of gameData.walkedReds) {
                             gameData.map[slot] = 0;
@@ -41724,9 +41994,7 @@ const packs = function () {
                         gameData.walkedReds.length = 0;
 
                         //重新放置曹丕
-                        const px = gameData.x;
-                        const py = gameData.y;
-                        const slot = gameData.getSlotFromPos(px, py);
+                        const slot = gameData.getSlotFromPos(gameData.x, gameData.y);
                         gameData.map[slot] = [0, 0];
 
                         get.event().result = {
@@ -41734,18 +42002,15 @@ const packs = function () {
                             name: name,
                             nextData: gameData,
                             curData: gameData,
-                        }
+                        };
 
+                        broadcastState('end', false, `本次登阶成功！击败了${get.translation(name)}（最终分数 ${gameData.score}）`);
                         onGameOver();
                     }
 
                     function onGameFailed(reason) {
-                        setTips('本次登阶失败...');
-
                         //重新放置曹丕
-                        const px = initialData.x;
-                        const py = initialData.y;
-                        const slot = initialData.getSlotFromPos(px, py);
+                        const slot = initialData.getSlotFromPos(initialData.x, initialData.y);
                         initialData.map[slot] = [0, 0];
 
                         get.event().result = {
@@ -41755,16 +42020,16 @@ const packs = function () {
                             curData: gameData,
                         };
 
+                        broadcastState('end', false, '本次登阶失败...', [initialData.x, initialData.y]);
                         onGameOver();
                     }
 
-                    function onGameOver() {
-                        game.broadcastAll(function (id, timeout) {
-                            get.idDialog(id)?.close();
-                            if (_status.connectMode) {
-                                lib.configOL.choose_timeout = timeout;
-                            }
-                        }, videoId, originalTimeout);
+                    async function onGameOver() {
+                        //让大家先看清结果再关界面喵
+                        await sleep(1200);
+
+                        //各端一起收尾：关界面、还原选牌时间
+                        game.broadcastAll('dengjie', 'close', videoId, originalTimeout);
 
                         if (player.isMine()) {
                             game.stopCountChoose();
@@ -41786,108 +42051,8 @@ const packs = function () {
                     const event = game.createEvent('dengjieGame', false);
                     event.set('noconfirm', true);
                     event.setContent(async function (event) {
-                        event.switchToAuto = function () {
-                            //喜欢偷懒让AI帮你玩是吧喵，看AI怎么摆烂制裁你哦喵
-                            //孩子不行，AI也是有能力玩的
-                            const startX = gameData.x;
-                            const startY = gameData.y;
-
-                            let pathFound = null;
-                            let targetName = null;
-
-                            //深度优先搜索函数
-                            function dfs(x, y, curScore, walkedReds, mapState, path) {
-                                //检查当前位置是否越界
-                                if (x < 0 || x >= gameData.width || y < 0 || y >= gameData.height) return false;
-
-                                const slot = x + y * gameData.width;
-                                const cell = mapState[slot];
-
-                                //角色格子
-                                if (Array.isArray(cell) && cell[0] !== 0 && curScore > Math.abs(cell[1])) {
-                                    pathFound = path.concat([[x, y]]);
-                                    targetName = NAMES[cell[0]];
-                                    return true;
-                                }
-
-                                //计算当前格子分数
-                                let scoreDelta = 0;
-                                let newWalkedReds = walkedReds.slice();
-                                let newMapState = mapState.slice();
-
-                                if (typeof cell === 'number') {
-                                    scoreDelta = cell;
-                                    if (cell !== 0) {
-                                        newMapState[slot] = 0;
-                                        if (cell < 0) newWalkedReds.push(slot);
-                                    }
-                                }
-
-                                const newScore = curScore + scoreDelta;
-                                if (newScore < 0) return false; //分数不够走负格
-
-                                //遍历方向，优先 +1，再 0，最后 -1
-                                const dirs = [[1, 0], [0, 1], [-1, 0], [0, -1]];
-                                dirs.sort(([dx1, dy1], [dx2, dy2]) => {
-                                    const s1 = mapState[(x + dx1) + (y + dy1) * gameData.width];
-                                    const s2 = mapState[(x + dx2) + (y + dy2) * gameData.width];
-                                    const v = val => (typeof val === 'number' ? val : val[1]);
-                                    return (v(s2) || 0) - (v(s1) || 0); //大分数先走
-                                });
-
-                                for (const [dx, dy] of dirs) {
-                                    const nx = x + dx;
-                                    const ny = y + dy;
-
-                                    //防止无限循环，允许回头
-                                    const key = nx + ',' + ny + ',' + newScore + ',' + newWalkedReds.join(',');
-                                    dfs.visited ??= new Set();
-                                    if (dfs.visited.has(key)) continue;
-                                    dfs.visited.add(key);
-
-                                    if (dfs(nx, ny, newScore, newWalkedReds, newMapState, path.concat([[x, y]]))) {
-                                        return true;
-                                    }
-                                }
-
-                                return false;
-                            }
-
-                            //执行 DFS
-                            dfs.visited = new Set();
-                            const success = dfs(startX, startY, gameData.score, gameData.walkedReds.slice(), gameData.map.slice(), []);
-                            if (!success) {
-                                onGameFailed('switchauto');
-                                return;
-                            }
-
-                            //同步执行路径，更新 gameData
-                            for (const [x, y] of pathFound) {
-                                const slot = gameData.getSlotFromPos(x, y);
-                                const cell = gameData.map[slot];
-
-                                if (Array.isArray(cell) && cell[0] !== 0) {
-                                    targetName = NAMES[cell[0]];
-                                    gameData.map[slot] = 0;
-                                } else if (typeof cell === 'number') {
-                                    gameData.score += cell;
-                                    if (cell !== 0) {
-                                        gameData.map[slot] = 0;
-                                        if (cell < 0) gameData.walkedReds.push(slot);
-                                    }
-                                }
-
-                                gameData.x = x;
-                                gameData.y = y;
-                            }
-
-                            event.result = {
-                                bool: true,
-                                name: targetName,
-                                curData: gameData,
-                                nextData: gameData,
-                            };
-                        };
+                        //占个位置给框架调用，真正的托管开关看 _status.auto / player.isAuto（这样取消托管也能交还操作权）
+                        event.switchToAuto = function () { };
 
                         //游戏的主循环喵，主体逻辑都在这里喵
                         async function gameLoop() {
@@ -41896,10 +42061,14 @@ const packs = function () {
 
                             gameData.initPlayer();
                             initialData.initPlayer();
+                            aiPlan = null;
+                            //整局的时限从棋盘铺好的这一刻开始算喵
+                            gameStart = Date.now();
+                            broadcastState(isAIPlaying() ? 'ai' : 'human', true);
 
                             try {
                                 while (true) {
-                                    const [x, y] = await waitNextStep();
+                                    const [x, y] = await nextStepInput();
                                     const [ok, reason] = finishStep(x, y);
 
                                     if (ok) {
@@ -41910,7 +42079,6 @@ const packs = function () {
                                             break;
                                         }
                                     } else {
-                                        await rollbackPlayer();
                                         failedReason = reason;
                                         break;
                                     }
@@ -41923,6 +42091,11 @@ const packs = function () {
                                 }
                             }
 
+                            //失败就把棋子摆回本次登阶的起点，画面才对得上喵
+                            if (!win) {
+                                await rollbackPlayer();
+                            }
+
                             if (win) {
                                 onGameWin(win);
                             } else {
@@ -41930,11 +42103,8 @@ const packs = function () {
                             }
                         }
 
-                        if (isAI) {
-                            event.switchToAuto();
-                        } else {
-                            gameLoop();
-                        }
+                        //人机/托管也走同一套主循环，只是输入交给AI喵
+                        gameLoop();
 
                         await gamePromise;
                     });

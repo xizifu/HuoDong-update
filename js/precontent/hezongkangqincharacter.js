@@ -408,7 +408,7 @@ const packs = function () {
                     }
                     if (!game.hasPlayer(target => {
                         if (target === player) return false;
-                        return get.mode() === 'identity' || current.isEnemyOf(player);
+                        return get.mode() === 'identity' || target.isEnemyOf(player);
                     })) return false;
                     return event.name !== 'phase' || game.phaseNumber === 0;
                 },
@@ -421,7 +421,7 @@ const packs = function () {
                     }
                     const targets = game.filterPlayer(target => {
                         if (target === player) return false;
-                        return get.mode() === 'identity' || current.isEnemyOf(player);
+                        return get.mode() === 'identity' || target.isEnemyOf(player);
                     });
                     if (targets.length >= (1 + (trigger.name === 'phaseZhunbei'))) {
                         const target = targets.randomGet();
