@@ -1,5 +1,7 @@
 import { lib, game, ui, get, ai, _status } from '../../../../noname.js';
 
+const bilibiliHedouPendingGain = new Map();
+
 const packs = function () {
     const huodongcharacter = {
         name: 'huodongcharacter',
@@ -9,7 +11,7 @@ const packs = function () {
             huodongcharacter: {
                 Chuodong: ['bilibili_shengxunyu', 'bilibili_Firewin', 'bilibili_jinglingqiu', 'bilibili_suixingsifeng', 'bilibili_Emptycity', 'bilibili_thunderlei', 'bilibili_lonelypatients', 'bilibili_ningjingzhiyuan', 'bilibili_xizhicaikobe'],
                 CDormitory: ['bilibili_yirenyixiaojian', 'bilibili_longjiuzhen', 'bilibili_diandian', 'bilibili_murufengchen', 'bilibili_wuzhuwanshui', 'bilibili_kuangshen', 'bilibili_yanjing', ...Array.from({ length: 3 }).map((_, index) => `bilibili_yanjing_friend${index + 1}`), 'bilibili_xiaoyaoruyun', 'bilibili_shuijiaobuboli'],
-                Cothers: ['bilibili_majun', 'lz_sufei', 'lz_tangzi', 'lz_liuqi', 'lz_huangquan', 'bilibili_zhugeliang', 'bilibili_caocao', 'bilibili_xiahoudun', 'bilibili_liuguanzhang', 'bilibili_gaowang', 'bilibili_simayi', 'old_dongxie', 'bilibili_sunhanhua', 'bilibili_zhoutaigong', 'bilibili_zhouxiaomei', 'bilibili_caifuren', 'bilibili_zhengxuan', 'bilibili_sp_xuyou', 'old_zuoci', 'bilibili_kuailiangkuaiyue', 'bilibili_wuqiao', 'bilibili_daxiao', 'bilibili_xushao', 'bilibili_shen_guojia', 'bilibili_re_xusheng', 'bilibili_zhangrang', 'bilibili_litiansuo', 'decade_huangwudie', 'bilibili_huanggai', 'bilibili_ekeshaoge', 'bilibili_guanning', 'bilibili_wangwang', 'diy_lvmeng', 'bilibili_wangtao', 'bilibili_wangyue', 'bilibili_x_wangtao', 'bilibili_x_wangyue', 'bilibili_daqiao', 'bilibili_xiaoqiao', 'bilibili_x_daqiao', 'bilibili_x_xiaoqiao', 'bilibili_ahuinan', 'bilibili_dongtuna', 'bilibili_x_ahuinan', 'bilibili_x_dongtuna'],
+                Cothers: ['bilibili_majun', 'lz_sufei', 'lz_tangzi', 'lz_liuqi', 'lz_huangquan', 'bilibili_zhugeliang', 'bilibili_caocao', 'bilibili_xiahoudun', 'bilibili_liuguanzhang', 'bilibili_gaowang', 'bilibili_simayi', 'old_dongxie', 'bilibili_sunhanhua', 'bilibili_zhoutaigong', 'bilibili_zhouxiaomei', 'bilibili_caifuren', 'bilibili_zhengxuan', 'bilibili_sp_xuyou', 'old_zuoci', 'bilibili_kuailiangkuaiyue', 'bilibili_wuqiao', 'bilibili_daxiao', 'bilibili_xushao', 'bilibili_shen_guojia', 'bilibili_re_xusheng', 'bilibili_zhangrang', 'bilibili_litiansuo', 'decade_huangwudie', 'bilibili_huanggai', 'bilibili_ekeshaoge', 'bilibili_guanning', 'bilibili_wangwang', 'diy_lvmeng', 'bilibili_wangtao', 'bilibili_wangyue', 'bilibili_x_wangtao', 'bilibili_x_wangyue', 'bilibili_daqiao', 'bilibili_xiaoqiao', 'bilibili_x_daqiao', 'bilibili_x_xiaoqiao', 'bilibili_ahuinan', 'bilibili_dongtuna', 'bilibili_x_ahuinan', 'bilibili_x_dongtuna', 'bilibili_zhan_yuanshao'],
                 CXuanDie: ['bfake_zhanghua', 'bfake_hanshao', 'bfake_hanrong', 'bilibili_adong', 'bfake_jiananfeng', 'bfake_shen_zhangjiao', 'bfake_shen_zhangfei', 'bfake_shen_jiaxu', 'bfake_huanwen', 'bfake_miheng'],
             },
         },
@@ -83,6 +85,7 @@ const packs = function () {
             bilibili_x_xiaoqiao: ['female', 'wu', 3, ['dcqiqin', 'dcweiwan', 'dualside'], ['unseen', 'character:yue_xiaoqiao', 'die:yue_xiaoqiao']],
             bilibili_x_ahuinan: ['male', 'qun', 4, ['jueman', 'dualside'], ['unseen', 'character:ahuinan', 'die:ahuinan']],
             bilibili_x_dongtuna: ['male', 'qun', 4, ['oljianman', 'dualside'], ['unseen', 'character:dongtuna', 'die:dongtuna']],
+            bilibili_zhan_yuanshao: ['male', 'qun', 4, ['bilibili_pozhan', 'bilibili_hedou', 'bilibili_luanji'], ['character:re_yuanshao', 'tempname:re_yuanshao', 'die:re_yuanshao']],
             //千里走单骑
             DJ_pujing: ['male', 'qun', 1, [], ['unseen', 'character:pujing']],
             DJ_huban: ['male', 'qun', 2, [], ['unseen', 'character:huban']],
@@ -3684,6 +3687,316 @@ const packs = function () {
                 forced: true,
                 content() {
                     player.gainMaxHp();
+                },
+            },
+            bilibili_pozhan: {
+                audio: 'ext:活动武将/audio/skill:2',
+                categories: () => ['战场技'],
+                mark: true,
+                init(player, skill) {
+                    if (!player.storage[skill]) player.storage[skill] = { x: 3, lost: 0, kills: 0, state: 'preparing' };
+                },
+                onremove(player, skill) {
+                    player.unmarkSkill(skill);
+                },
+                trigger: {
+                    global: ['gameStart', 'useCard', 'respond', 'loseAsyncAfter'],
+                    player: ['loseAfter'],
+                },
+                filter(event, player, name) {
+                    const st = player.storage.bilibili_pozhan;
+                    if (!st) return false;
+                    switch (name) {
+                        case 'gameStart':
+                            return true;
+                        case 'loseAfter':
+                        case 'loseAsyncAfter':
+                            if (name === 'loseAfter' && event.parent?.name === 'loseAsync') return false;
+                            if (st.state !== 'preparing') return false;
+                            return new Set(event.getl(player).cards).size > 0;
+                        case 'useCard':
+                        case 'respond':
+                            if (st.state !== 'battlefield') return false;
+                            return event.card?.name === 'sha';
+                        default:
+                            return false;
+                    }
+                },
+                forced: true,
+                async content(event, trigger, player) {
+                    const skill = 'bilibili_pozhan';
+                    const st = player.storage[skill];
+                    switch (event.triggername) {
+                        case 'gameStart': {
+                            bilibiliHedouPendingGain.clear();
+                            await lib.skill[skill].choosePo(player);
+                            break;
+                        }
+                        case 'loseAfter':
+                        case 'loseAsyncAfter': {
+                            if (st.state !== 'preparing') break;
+                            const num = new Set(trigger.getl(player).cards).size;
+                            if (!num) break;
+                            st.lost += num;
+                            if (st.lost >= 6 - st.x) {
+                                st.lost = 0;
+                                st.kills = 0;
+                                st.state = 'battlefield';
+                                player.markSkill(skill);
+                                player.popup('界桥战场');
+                                game.log(player, '进入了', '#y界桥战场');
+                            }
+                            else player.markSkill(skill);
+                            break;
+                        }
+                        case 'useCard':
+                        case 'respond': {
+                            st.kills++;
+                            if (st.kills < st.x) {
+                                player.markSkill(skill);
+                                break;
+                            }
+                            st.state = 'resolving';
+                            st.kills = 0;
+                            player.markSkill(skill);
+                            const x = st.x;
+                            const current = _status.currentPhase || trigger.player || player;
+                            const result = await player.chooseBool(`是否摸4张牌并令${get.translation(current)}发动一次【乱击】？`).set('ai', () => true).forResult();
+                            if (result.bool) {
+                                await player.draw(4);
+                                if (current.isAlive()) await lib.skill.bilibili_luanji.execute(current, x);
+                            }
+                            st.state = 'preparing';
+                            st.lost = 0;
+                            st.kills = 0;
+                            player.markSkill(skill);
+                            game.log(player, '退出了', '#y界桥战场');
+                            if (player.isAlive() && player.hasSkill(skill)) await lib.skill[skill].choosePo(player);
+                            break;
+                        }
+                    }
+                },
+                async choosePo(player) {
+                    const skill = 'bilibili_pozhan';
+                    const result = await player.chooseControl(['2', '3', '4', '5']).set('prompt', '迫战：请选择“迫”的点数（2~5）').set('ai', () => '3').forResult();
+                    const x = parseInt(result.control, 10);
+                    const st = player.storage[skill];
+                    if ([2, 3, 4, 5].includes(x)) st.x = x;
+                    player.markSkill(skill);
+                    game.log(player, '将“迫”设为', '#y' + st.x);
+                },
+                intro: {
+                    markcount(storage, player) {
+                        return typeof storage?.x === 'number' ? String(storage.x) : '';
+                    },
+                    content(storage, player) {
+                        if (!storage || typeof storage.x !== 'number') return '尚未选择“迫”';
+                        const { x, state, lost, kills } = storage;
+                        if (state === 'battlefield') return `界桥战场：累计使用/打出${kills}/${x}张【杀】`;
+                        if (state === 'resolving') return '界桥战场结算中…';
+                        return `迫：${x}；已失去${lost}/${6 - x}张牌`;
+                    },
+                },
+            },
+            bilibili_luanji: {
+                audio: 'luanji',
+                async execute(player, x) {
+                    if (!player || player.isDead?.() || typeof x !== 'number' || x < 1) return;
+                    await player.drawTo(x);
+                    if (player.countCards('h') < x) {
+                        game.log(player, '的手牌不足，无法发动', '#g【乱击】');
+                        return;
+                    }
+                    const result = await player.chooseCard('h', true, `乱击：选择${get.cnNumber(x)}张手牌当作【万箭齐发】使用`, x).forResult();
+                    if (!result.bool || !result.cards || result.cards.length !== x) return;
+                    const targets = game.filterPlayer(current => player.canUse('wanjian', current));
+                    if (!targets.length) {
+                        game.log(player, '没有合法的目标，无法发动', '#g【乱击】');
+                        return;
+                    }
+                    player.logSkill('bilibili_luanji');
+                    await player.useCard({ name: 'wanjian' }, result.cards, targets, 'bilibili_luanji');
+                },
+            },
+            bilibili_hedou: {
+                audio: 'ext:活动武将/audio/skill:2',
+                trigger: { global: 'useCard' },
+                group: ['bilibili_hedou_effect', 'bilibili_hedou_gain', 'bilibili_hedou_cleanup', 'bilibili_hedou_clear'],
+                onremove(player) {
+                    lib.skill.bilibili_hedou.clearPending(player);
+                },
+                clearPending(player) {
+                    for (const [card, entry] of bilibiliHedouPendingGain) {
+                        if (entry.player === player) bilibiliHedouPendingGain.delete(card);
+                    }
+                },
+                filter(event, player) {
+                    if (event.bilibili_hedou_activated) return false;
+                    if (player.hasSkill('bilibili_hedou_effect_used') && player.hasSkill('bilibili_hedou_gain_used')) return false;
+                    if (get.type(event.card) !== 'trick' || get.subtype(event.card) === 'delay') return false;
+                    if (get.info(event.card).multitarget) return false;
+                    return event.targets.length >= 2;
+                },
+                gainValue(player, card, cards) {
+                    if (get.info(card).destroy) return 0;
+                    const list = (cards || []).map(current => current.cards ? current.cards : [current]).flat();
+                    if (!list.length) return 0;
+                    return list.reduce((sum, current) => sum + get.value(current, player), 0) * 0.5;
+                },
+                async cost(event, trigger, player) {
+                    const choices = [];
+                    const choiceList = [];
+                    if (!player.hasSkill('bilibili_hedou_effect_used')) {
+                        choices.push('double');
+                        choiceList.push('令此牌对其中一名目标生效两次且对其余目标无效');
+                    }
+                    if (!player.hasSkill('bilibili_hedou_gain_used')) {
+                        choices.push('null');
+                        choiceList.push('令此牌对其中一名目标无效且此牌进入弃牌堆后你获得之');
+                    }
+                    const effects = trigger.targets.map(target => get.effect(target, trigger.card, trigger.player, player));
+                    const total = effects.reduce((sum, effect) => sum + effect, 0);
+                    const gainValue = lib.skill.bilibili_hedou.gainValue(player, trigger.card, trigger.cards);
+                    const optionValues = new Map();
+                    if (choices.includes('double')) optionValues.set('double', 2 * Math.max(...effects) - total);
+                    if (choices.includes('null')) optionValues.set('null', -Math.min(...effects) + gainValue);
+                    const result = await player.chooseControl(choices, 'cancel2').set('prompt', get.prompt(event.skill, trigger.player)).set('choiceList', choiceList).set('ai', () => {
+                        let control = 'cancel2', value = 0;
+                        for (const [key, optionValue] of optionValues) {
+                            if (optionValue > value) {
+                                control = key;
+                                value = optionValue;
+                            }
+                        }
+                        return control;
+                    }).forResult();
+                    if (!result.control || result.control === 'cancel2') {
+                        event.result = { bool: false };
+                        return;
+                    }
+                    const control = result.control;
+                    const targetResult = await player.chooseTarget(get.prompt2(event.skill), control === 'double' ? '选择生效两次的目标' : '选择无效的目标', [1, 1], (card, player2, target) => {
+                        return _status.event.targets.includes(target);
+                    }).set('targets', trigger.targets).set('ai', target => {
+                        const effect = get.effect(target, trigger.card, trigger.player, player);
+                        return control === 'double' ? 2 * effect - total : -effect + gainValue;
+                    }).forResult();
+                    if (!targetResult.bool) {
+                        event.result = { bool: false };
+                        return;
+                    }
+                    event.result = { bool: true, cost_data: { control, target: targetResult.targets[0] } };
+                },
+                async content(event, trigger, player) {
+                    const { control, target } = event.cost_data;
+                    if (control === 'double') {
+                        trigger.excluded.addArray(trigger.targets.filter(i => i !== target));
+                        trigger.bilibili_hedou_effect = { player, target };
+                        game.log(player, '令', trigger.card, '对', target, '生效两次，对其余目标无效');
+                    }
+                    else {
+                        trigger.excluded.add(target);
+                        const cards = trigger.cards.map(i => i.cards ? i.cards : [i]).flat();
+                        for (const card of cards) bilibiliHedouPendingGain.set(card, { player, event: trigger });
+                        game.log(player, '令', trigger.card, '对', target, '无效');
+                    }
+                    trigger.bilibili_hedou_activated = true;
+                    player.addTempSkill(`bilibili_hedou_${control === 'double' ? 'effect' : 'gain'}_used`);
+                },
+                subSkill: {
+                    effect_used: {
+                        charlotte: true,
+                        silent: true,
+                    },
+                    gain_used: {
+                        charlotte: true,
+                        silent: true,
+                    },
+                    effect: {
+                        charlotte: true,
+                        trigger: { global: 'useCardEffectEnd' },
+                        filter(event, player) {
+                            return event.bilibili_hedou_effect?.player === player;
+                        },
+                        forced: true,
+                        popup: false,
+                        async content(event, trigger, player) {
+                            if (!trigger.bilibili_hedou_effect_applied) {
+                                trigger.bilibili_hedou_effect_applied = true;
+                                trigger.effectCount = Math.max(trigger.effectCount, 2);
+                                if (trigger.card?.name === 'wugu' && trigger.wuguShownCards) {
+                                    const cards = trigger.wuguShownCards.filter(card => get.position(card, true) === 'd');
+                                    if (cards.length) {
+                                        trigger.card.storage ??= {};
+                                        trigger.card.storage.fixedShownCards = cards;
+                                        trigger.bilibili_hedou_wugu_backup = true;
+                                    }
+                                }
+                                game.log(trigger.card, '对', trigger.bilibili_hedou_effect.target, '额外结算一次');
+                            }
+                            else if (trigger.bilibili_hedou_wugu_backup) {
+                                delete trigger.card.storage.fixedShownCards;
+                                delete trigger.bilibili_hedou_wugu_backup;
+                            }
+                        },
+                    },
+                    gain: {
+                        charlotte: true,
+                        trigger: { global: 'cardsDiscardAfter' },
+                        filter(event, player) {
+                            return event.cards.some(card => bilibiliHedouPendingGain.get(card)?.player === player);
+                        },
+                        forced: true,
+                        popup: false,
+                        async content(event, trigger, player) {
+                            const cards = [];
+                            for (const card of trigger.cards) {
+                                const entry = bilibiliHedouPendingGain.get(card);
+                                if (!entry || entry.player !== player) continue;
+                                bilibiliHedouPendingGain.delete(card);
+                                if (get.position(card, true) === 'd') cards.push(card);
+                            }
+                            if (cards.length) {
+                                game.log(player, '获得了', cards);
+                                await player.gain(cards, 'gain2');
+                            }
+                        },
+                    },
+                    cleanup: {
+                        charlotte: true,
+                        trigger: { global: 'useCardAfter' },
+                        filter(event, player) {
+                            for (const entry of bilibiliHedouPendingGain.values()) {
+                                if (entry.player === player && entry.event === event) return true;
+                            }
+                            return false;
+                        },
+                        forced: true,
+                        popup: false,
+                        async content(event, trigger, player) {
+                            for (const [card, entry] of bilibiliHedouPendingGain) {
+                                if (entry.player !== player || entry.event !== trigger) continue;
+                                if (get.position(card, true) !== 'o') bilibiliHedouPendingGain.delete(card);
+                            }
+                        },
+                    },
+                    clear: {
+                        charlotte: true,
+                        trigger: { global: 'dieAfter' },
+                        forceDie: true,
+                        filter(event, player) {
+                            if (event.player !== player) return false;
+                            for (const entry of bilibiliHedouPendingGain.values()) {
+                                if (entry.player === player) return true;
+                            }
+                            return false;
+                        },
+                        forced: true,
+                        popup: false,
+                        async content(event, trigger, player) {
+                            lib.skill.bilibili_hedou.clearPending(player);
+                        },
+                    },
                 },
             },
             //远古武将技能
@@ -14942,6 +15255,15 @@ const packs = function () {
             bilibili_chuandu_info: '锁定技，准备阶段/结束阶段，你令你与场上所有拥有“染”标记的相邻其他角色获得“染”标记，然后你摸一张牌/拥有“染”标记的角色各失去1点体力。',
             bilibili_shuaiwei: '衰萎',
             bilibili_shuaiwei_info: '当你使用牌指定拥有“染”的角色为目标后/当你成为拥有“染”的角色使用牌的目标后，你可以移除其“染”标记，令此牌对其额外结算一次/对你无效。',
+            bilibili_zhan_yuanshao: '战袁绍',
+            bilibili_zhan_yuanshao_ab: '袁绍',
+            bilibili_zhan_yuanshao_prefix: '战',
+            bilibili_pozhan: '迫战',
+            bilibili_pozhan_info: `战场技。游戏开始时，你选择2至5之间的一个点数，称之为“迫”。当你累计失去6-X张牌后，进入${get.poptip('rule_bilibili_jieqiao')}。处于${get.poptip('rule_bilibili_jieqiao')}时，全场角色累计使用或打出X张【杀】后，你可以摸4张牌并令当前回合角色立即发动一次〖乱击〗，然后退出${get.poptip('rule_bilibili_jieqiao')}并重新选择“迫”。（X为“迫”的点数）`,
+            bilibili_hedou: '合斗',
+            bilibili_hedou_info: '每回合各限一次，当任意角色使用多目标锦囊牌指定目标后，你可以选择一项：①令此牌对其中一个目标生效两次且对其余目标无效；②令此牌对其中一个目标无效且此牌进入弃牌堆后你获得之。',
+            bilibili_luanji: '乱击',
+            bilibili_luanji_info: '你将手牌摸至X张，然后使用X张手牌当【万箭齐发】使用。（X为“迫”的点数）',
             bilibili_huaikui: '坏溃',
             bilibili_huaikui_info: '出牌阶段限一次，你可以进行一次判定，若结果为红/黑色，则场上所有拥有“染”标记的角色依次选择一项：①弃置两张牌/交给你一张牌；②受到1点伤害。',
             bilibili_huaikui_append: '<span style="font-family:yuanli">不好孩子们，我们的群聊都被病毒攻陷了！</span>',

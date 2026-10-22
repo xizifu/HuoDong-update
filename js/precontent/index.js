@@ -354,6 +354,11 @@ export async function precontent(bilibilicharacter) {
         id: 'rule_xizifuSkill',
         info: '成器后的数字为本局游戏发动此技能的次数上限，发动带有此标签的技能后，需满足技能“进学”条件才可继续发动此技能。',
     });
+    lib.poptip.add({
+        name: '界桥战场',
+        id: 'rule_bilibili_jieqiao',
+        info: '战袁绍〖迫战〗创造的战场。战袁绍累计失去6-X张牌后进入，全场角色累计使用或打出X张【杀】后触发结算并退出，随后战袁绍重新选择“迫”。（X为“迫”的点数）',
+    });
     //----------------游戏播报·始----------------
     lib.skill._OpenTheGame = {
         charlotte: true,
@@ -823,6 +828,7 @@ export async function precontent(bilibilicharacter) {
                         MiNiAppkill: Object.keys(MiNiAppkill().character),
                         MiNikill: ['Mbaby_star_dongzhuo', 'Mbaby_star_sunjian', 'Mbaby_star_zhangzhao', 'Mbaby_zhanghu', 'Mbaby_yue_xiaoqiao', 'Mbaby_dc_sp_zhurong', 'Mbaby_shen_guojia', 'Mqing_lvdiao', 'Mbaby_feiyi', 'Mbaby_shen_pangtong', 'Mbaby_qiuliju', 'Mbaby_huangwudie', 'Mbaby_sb_xizhicai'],
                         WeChatkill: ['wechat_sb_zhurong', 'wechat_zhi_yanghu', 'wechat_zhiyin_zhaoe', 'wechat_zhi_jiaxu', 'wechat_zhi_xiahouhui', 'wechat_yuwenyuejuanren', 'wechat_shuxueyazhouren'],
+                        huodongcharacter: ['bilibili_zhan_yuanshao'],
                     };
                     return Object.values(_status.HDWJ_ChangeLog_character).flat();
                 })(),
