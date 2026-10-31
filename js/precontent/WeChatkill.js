@@ -47,7 +47,7 @@ const packs = function () {
                         return list;
                     })(),
                     ...['zhenji', 'diaochan', 'wangcan', 'machao', 'pangde', 'jiangwei', 'taishici', 'caiwenji'].map(i => `wechat_sp_${i}`),
-                    ...['zhurong', 'zhangfei', 'zhenji', 'menghuo', 'zhouyu', 'zhugeliang', 'sp_zhugeliang', 'lvbu', 'lvmeng', 'yujin', 'huaxiong', 'sunquan', 'xiaoqiao', 'xiahouyuan', 'gaoshun', 'handang', 'guojia', 'huanggai', 'diaochan', 'huangyueying', 'zhangliao', 'sunshangxiang', 'zhaoyun', 'machao', 'huangzhong', 'caocao', 'sunce'].map(i => `wechat_sb_${i}`),
+                    ...['caoren', 'zhurong', 'zhangfei', 'zhenji', 'menghuo', 'zhouyu', 'zhugeliang', 'sp_zhugeliang', 'lvbu', 'lvmeng', 'yujin', 'huaxiong', 'sunquan', 'xiaoqiao', 'xiahouyuan', 'gaoshun', 'handang', 'guojia', 'huanggai', 'diaochan', 'huangyueying', 'zhangliao', 'sunshangxiang', 'zhaoyun', 'machao', 'huangzhong', 'caocao', 'sunce'].map(i => `wechat_sb_${i}`),
                     ...['shamoke', 'wangyuanji', 'caochun', 'old_sunluyu', 'shantao', 'ruanji', 'jikang', 'ruanxian', 'caojie', 'xuezong', 'caiyong', 'xushi', 'sundeng', 'huanghao', 'guohuanghou', 'liucheng', 'sunluyu', 'jsp_huangyueying', 'wanglang', 'chendeng', 'zhuling', 'caizhenji', 'ol_bianfuren', 'zhangxingcai', 'huojun'].map(i => `wechat_${i}`),
                     ...[],
                 ],
@@ -207,7 +207,8 @@ const packs = function () {
             wechat_huanggai: ['male', 'wu', 4, ['wechatkurou', 'wechatzhaxiang']],
             wechat_xurong: ['male', 'qun', 4, ['wechatxionghuo', 'wechatshajue']],
             wechat_sb_zhangfei: ['male', 'shu', 4, ['wechatpaoxiao', 'wechatxieji']],
-            wechat_sb_zhurong: ['female', 'shu', 4, ['sbjuxiang', 'wechatlieren']],
+            wechat_sb_zhurong: ['female', 'shu', 4, ['sbjuxiang', 'wechatsblieren'], ['name:null|null']],
+            wechat_sb_caoren: ['male', 'wei', 4, ['wechatsbjushou', 'wechatsbjiewei']],
             //神武将
             wechat_shen_zhugeliang: ['male', 'shen', 3, ['wechatqixing', 'wechatjifeng', 'wechattianfa'], ['shu', 'name:诸葛|亮', 'clan:琅琊诸葛氏']],
             wechat_shen_lvmeng: ['male', 'shen', 3, ['shelie', 'wechatgongxin'], ['wu']],
@@ -22873,7 +22874,7 @@ const packs = function () {
                 },
             },
             //谋祝融
-            wechatlieren: {
+            wechatsblieren: {
                 audio: 'sblieren',
                 inherit: 'sblieren',
                 filter(event, player) {
@@ -24282,6 +24283,106 @@ const packs = function () {
                     }
                 }
             },
+            // 谋曹仁
+            wechatsbjushou: {
+                audio: 'sbjushou',
+                mod: {
+                    maxHandcard(player, num) {
+                        return num + player.hujia;
+                    },
+                },
+                locked: false,
+                enable: 'phaseUse',
+                usable: 1,
+                filter(event, player) {
+                    return !player.isTurnedOver();
+                },
+                filterCard: lib.filter.cardDiscardable,
+                selectCard: [1, 2],
+                check(card) {
+                    const player = get.player();
+                    if (ui.selected.cards.reduce((num, card) => num + (get.subtypes(card).includes('equip1') ? 2 : 1), 0) + player.hujia >= 5) return 0;
+                    return 6.5 - get.value(card);
+                },
+                position: 'he',
+                logAudio: () => 1,
+                async content(event, trigger, player) {
+                    const { cards } = event;
+                    await player.turnOver();
+                    const num = cards.reduce((num, card) => num + (get.subtypes(card).includes('equip1') ? 2 : 1), 0);
+                    await player.changeHujia(num, null, true);
+                },
+                ai: {
+                    order: 5,
+                    result: { player: 1 },
+                },
+                group: 'wechatsbjushou_damage',
+                subSkill: {
+                    damage: {
+                        audio: 'sbjushou2.mp3',
+                        trigger: { player: 'damageEnd' },
+                        filter(event, player) {
+                            return player.isTurnedOver();
+                        },
+                        async cost(event, trigger, player) {
+                            const result = await player.chooseControl({
+                                controls: ['翻面', '获得1点护甲', 'cancel2'],
+                                prompt: get.prompt(event.skill),
+                                prompt2: '你可以选择一项',
+                                ai: () => player.hujia >= 3 ? 0 : 1,
+                            }).forResult();
+                            event.result = {
+                                bool: result.control !== 'cancel2',
+                                cost_data: result.index,
+                            }
+                        },
+                        async content(event, trigger, player) {
+                            if (event.cost_data === 0) await player.turnOver();
+                            else await player.changeHujia(1, null, true);
+                        },
+                        ai: {
+                            effect: {
+                                target(card, player, target) {
+                                    if (!target.isTurnedOver()) return;
+                                    if (!get.tag(card, 'damage')) return;
+                                    if (player.hasSkillTag('jueqing', false, target)) return [1, -2];
+                                    if ((card.name === 'sha' && !player.hasSkill('jiu')) || target.hasSkillTag('filterDamage', null, { player, card })) return 0.1;
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            wechatsbjiewei: {
+                audio: 'sbjiewei',
+                trigger: { player: 'turnOverEnd' },
+                filter(event, player) {
+                    return player.hujia > 0;
+                },
+                async cost(event, trigger, player) {
+                    event.result = await player.chooseTarget(get.prompt2(event.skill)).set('ai', target => {
+                        const player = get.player();
+                        const eff1 = get.effect(target, { name: 'shunshou_copy', position: 'hej' }, player, player);
+                        const eff2 = get.effect(target, { name: 'draw' }, player, player) * player.hujia;
+                        return Math.max(eff1, eff2);
+                    }).forResult();
+                },
+                async content(event, trigger, player) {
+                    const target = event.targets[0];
+                    await player.changeHujia(-1);
+                    const num = player.hujia;
+                    let result;
+                    const goon = target.hasCards('hej');
+                    if (goon && num > 0) {
+                        result = await player.chooseControl().set('choiceList', [`${target.hasCards('h') ? `观看${get.translation(target)}手牌并` : ''}获得其区域内的一张牌`, `令其摸${get.cnNumber(num)}张牌`]).set('ai', () => {
+                            const { player, target } = get.event();
+                            return get.effect(target, { name: 'shunshou_copy', position: 'hej' }, player, player) > get.effect(target, { name: 'draw' }, player, player) * player.hujia ? 0 : 1;
+                        }).set('target', target).forResult();
+                    } else result = { index: goon ? 0 : 1 };
+                    if (result?.index == 0) await player.gainPlayerCard({ target, position: 'hej', forced: true, visible: true });
+                    else await target.draw(player.hujia);
+                },
+            },
         },
         dynamicTranslate: {
             wechatxiangzhi(player) {
@@ -25614,8 +25715,8 @@ const packs = function () {
             wechatxieji: '协击',
             wechatxieji_info: '准备阶段，你可以选择一名其他角色。其下个回合结束时，你可以选择至多两名本回合成为过【杀】的目标的角色，你依次视为对这些角色使用【杀】；然后你摸X张牌（X为本回合【杀】造成的伤害总值且至多为3）。',
             wechat_sb_zhurong: '小程序谋祝融',
-            wechatlieren: '烈刃',
-            wechatlieren_info: '当你使用【杀】指定一名其他角色为唯一目标后，你可以摸一张牌并与其拼点。若你赢，此【杀】结算完毕后，你可以对另一名其他角色造成1点伤害。',
+            wechatsblieren: '烈刃',
+            wechatsblieren_info: '当你使用【杀】指定一名其他角色为唯一目标后，你可以摸一张牌并与其拼点。若你赢，此【杀】结算完毕后，你可以对另一名其他角色造成1点伤害。',
             wechat_zhiyin_zhaoe: '极赵娥',
             wechatqianren: '潜刃',
             wechatqianren_info: '出牌阶段限一次，你可以将一张非初始手牌且非本回合获得的牌当作刺【杀】使用。若转换前的牌为【杀】，你可秘密选择一项：1.造成伤害后，此【杀】不计入使用次数；2.目标角色抵消此【杀】时，你获得其因此【杀】弃置的牌并摸一张牌。',
@@ -25664,6 +25765,11 @@ const packs = function () {
             wechathuaxue_info: '出牌阶段限一次，你可以移去1枚“细胞”标记并弃置一张牌，然后对一名其他角色造成1点火属性伤害。',
             wechatwuli: '物理',
             wechatwuli_info: '①当你造成或受到属性伤害后，你获得1枚“能量”标记。②出牌阶段，若你的“能量”标记数不小于3，你可以移去所有“能量”标记对所有其他角色造成1点雷电伤害并摸一张牌。',
+            wechat_sb_caoren: '小程序谋曹仁',
+            wechatsbjushou: '据守',
+            wechatsbjushou_info: '①出牌阶段限一次。若你的武将牌正面朝上，你可以弃置至多两张牌，然后你翻面并获得等量护甲（你每因此弃置了一张武器牌则额外获得1点护甲）。②当你受到伤害后，若你的武将牌背面朝上，你可以选择一项：1.翻面；2.获得1点护甲。③你的手牌上限+X（X为你的护甲数）。',
+            wechatsbjiewei: '解围',
+            wechatsbjiewei_info: '当你翻面时，你可以失去1点护甲并选择一名角色。然后你选择一项：1.你观看其手牌并获得其区域内的一张牌；2.令其摸X张牌（X为你的护甲数）。',
 
             // ----------------------- 台词部分 ----------------------- //
             '#ext:活动武将/audio/skill/wechatzhongxin1': '苍生之愿，即贫道所愿也。',
