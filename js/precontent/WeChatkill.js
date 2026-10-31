@@ -20559,13 +20559,15 @@ const packs = function () {
                 audio: 'ext:活动武将/audio/skill:2',
                 trigger: {
                     player: 'loseAfter',
-                    global: 'loseAsyncAfter',
+                    global: ['equipAfter', 'addJudgeAfter', 'gainAfter', 'loseAsyncAfter', 'addToExpansionAfter'],
                 },
                 filter(event, player) {
                     if (player.countMark('wechatmoulvenum') >= lib.skill.wechatmoulvenum.getMax) return false;
-                    if (event.type != 'discard') return false;
+                    const evt = event.relatedEvent || event.getParent();
+                    if (['useCard', 'respond'].includes(evt?.name)) return false;
                     const history = player.getHistory('lose', evtx => {
-                        if (evtx.type != 'discard') return false;
+                        const evt = evtx.relatedEvent || evtx.getParent();
+                        if (['useCard', 'respond'].includes(evt?.name)) return false;
                         return evtx?.cards2?.length;
                     }).map(evtx => (event.name == 'lose' ? evtx : evtx.getParent()));
                     return history.indexOf(event) == 0;
@@ -20586,9 +20588,9 @@ const packs = function () {
                         },
                         async cost(event, trigger, player) {
                             let result;
-                            if (player.countCards('h', { name: 'sha' })) {
-                                result = await player.chooseToDiscard('h', { name: 'sha' }, get.prompt(event.skill), '弃置一张【杀】获得1点谋略值', 'chooseonly').set('ai', card => {
-                                    if (get.event().goon) return 7 - get.value(card);
+                            if (player.hasCards('h')) {
+                                result = await player.chooseCard('h',  get.prompt(event.skill), '重铸一张手牌获得1点谋略值（若此牌为【杀】则额外获得1点）').set('ai', card => {
+                                    if (get.event().goon) return 7 + (get.name(card) == 'sha' ? 2 : 0) - get.value(card);
                                     return 0;
                                 }).set('goon', (() => {
                                     if (player.countMark('wechatmoulvenum') >= 3 && player.hasValueTarget({ name: 'sha' })) return false;
@@ -20603,8 +20605,9 @@ const packs = function () {
                         },
                         async content(event, trigger, player) {
                             if (event.cards?.length) {
-                                await player.discard(event.cards);
-                                lib.skill.wechatmoulvenum.changeNum(2, player);
+                                await player.recast(event.cards);
+                                const num = get.name(event.cards[0], player) == 'sha' ? 2 : 1;
+                                lib.skill.wechatmoulvenum.changeNum(num, player);
                             }
                             else {
                                 lib.skill.wechatmoulvenum.changeNum(-2, player);
@@ -25172,7 +25175,7 @@ const packs = function () {
             wechatjijian_info: '出牌阶段限一次，你可记录一张基本牌或锦囊牌。当此牌于你的回合外进入弃牌堆后，你可以对一名其他角色造成1点伤害。',
             wechat_zhiyin_jiaxu: '极贾诩',
             wechatquanbian: '权变',
-            wechatquanbian_info: `锁定技。当一名角色成为伤害牌的唯一目标后，若此牌与上一张指定该角色的伤害牌：①颜色相同，你获得1点${get.poptip('rule_moulvenum')}；牌名相同，你下次发动〖妙计〗时失去的${get.poptip('rule_moulvenum')}-1。`,
+            wechatquanbian_info: `锁定技。当一名角色成为伤害牌的唯一目标后，若此牌与上一张指定该角色的伤害牌：①颜色相同，你获得1点${get.poptip('rule_moulvenum')}；牌名相同，你下次发动${get.poptip('wechatmiaoji')}时失去的${get.poptip('rule_moulvenum')}-1。`,
             wechatkuangshi: '匡势',
             wechatkuangshi_info: '出牌阶段结束时，你可选择一名角色。然后若：X小于Y，则其将手牌摸至Y（至多5张），然后你可观看并使用其获得牌中的一张牌；X大于Y，则其将手牌弃至Y（至多5张），然后你可使用其弃置牌中的一张牌（X为其区域内的牌数，Y为其体力上限）。',
             wechatchenjie: '沉节',
@@ -25487,7 +25490,7 @@ const packs = function () {
             wechatsbzaiqi_info: '弃牌阶段结束时，你可以令至多X名角色选择一项：1.令你摸一张牌；2.弃置一张红桃牌，令你回复1点体力（X为你本回合造成的伤害值之和且至多为3）。',
             wechat_zhiyin_lvmeng: '极吕蒙',
             wechatqiuxue: '遒学',
-            wechatqiuxue_info: `①你每回合首次因弃置失去牌时，你获得2点${get.poptip('rule_moulvenum')}。②每回合限一次，当你使用锦囊牌后，你可以弃置一张【杀】获得1点${get.poptip('rule_moulvenum')}，或消耗2点${get.poptip('rule_moulvenum')}视为使用一张无次数限制的【杀】。`,
+            wechatqiuxue_info: `①你每回合首次不因使用或打出而失去牌时，你获得2点${get.poptip('rule_moulvenum')}。②每回合限一次，当你使用锦囊牌后，你可以重铸一张手牌获得1点${get.poptip('rule_moulvenum')}（若此牌为【杀】则额外获得1点），或消耗2点${get.poptip('rule_moulvenum')}视为使用一张无次数限制的【杀】。`,
             wechatfuyuan: '伏渊',
             wechatfuyuan_info: `觉醒技。准备阶段，若你的${get.poptip('rule_moulvenum')}不小于3，你减少1点体力上限并回复体力至体力上限，然后获得${get.poptip('wechattujing')}。`,
             wechattujing: '图荆',
