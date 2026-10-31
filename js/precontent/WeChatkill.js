@@ -23282,36 +23282,39 @@ const packs = function () {
                     const result = await player.judge(card => get.name(card) === 'sha' ? 1 : -1).forResult();
                     if (result?.card && get.name(result.card) === 'sha' && [result.card].someInD('od')) {
                         await player.gain(result.card, 'gain2');
-                        player.addTempSkill('wechatjueshi_wait');
+                        player.addTempSkill('wechatjueshi_extra');
                     }
                 },
-                group: 'wechatjueshi_extra',
                 subSkill: {
-                    wait: { charlotte: true },
                     extra: {
                         audio: 'wechatjueshi',
+                        charlotte: true,
                         trigger: { global: 'phaseEnd' },
-                        prompt2: () => '执行一个额外回合并失去此技能',
-                        filter(event, player) {
-                            return player.hasSkill('wechatjueshi_wait');
-                        },
+                        prompt2: () => '你可以执行一个额外回合并失去【决时】',
                         skillAnimation: true,
                         animationColor: 'fire',
                         async content(event, trigger, player) {
                             player.insertPhase();
                             await player.removeSkills('wechatjueshi');
                         },
+                        mark: true,
+                        intro: { content: '本回合结束时可以执行一个额外回合并失去【决时】' }
                     },
                 },
             },
             wechatxuechou: {
+                targetprompt2: target => {
+                    const player = get.player(), card = get.card();
+                    if (card?.name !== 'sha' || target.hasSkill('wechatxuechou_effect') || !target.classList.contains('selectable')) return;
+                    const num = player.getAllHistory('sourceDamage', evt => evt.player === target).reduce((sum, evt) => sum + evt.num, 0);
+
+                    return `${get.translation('wechatxuechou')}${num}`;
+                },
                 onChooseToUse(event) {
-                    event.targetprompt2.add(target => {
-                        const player = get.player(), card = get.card();
-                        if (card?.name !== 'sha' || target.hasSkill('wechatxuechou_effect') || !target.classList.contains('selectable')) return;
-                        const num = player.getHistory('sourceDamage', evt => evt.player === target).reduce((sum, evt) => sum + evt.num, 0);
-                        return `${get.translation('wechatxuechou')}${num}`;
-                    });
+                    event.targetprompt2.add(lib.skill.wechatxuechou.targetprompt2);
+                },
+                onChooseTarget(event) {
+                    event.targetprompt2.add(lib.skill.wechatxuechou.targetprompt2);
                 },
                 audio: 'ext:活动武将/audio/skill:2',
                 trigger: { global: 'dying' },
@@ -23319,7 +23322,7 @@ const packs = function () {
                     if (event.player === player || event.player.hasSkill('wechatxuechou_effect')) return false;
                     const reason = event.reason;
                     if (!reason?.card || reason.card.name !== 'sha' || reason.source !== player) return false;
-                    return player.getHistory('sourceDamage', evt => evt.player === event.player).reduce((sum, evt) => sum + evt.num, 0) >= event.player.maxHp;
+                    return player.getAllHistory('sourceDamage', evt => evt.player === event.player).reduce((sum, evt) => sum + evt.num, 0) >= event.player.maxHp;
                 },
                 forced: true,
                 logTarget: 'player',
