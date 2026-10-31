@@ -23558,13 +23558,9 @@ const packs = function () {
             wechatjieqing: {
                 audio: 'ext:活动武将/audio/skill:2',
                 trigger: { player: "phaseDrawBegin" },
-                filter(event, player) {
-                    return game.hasPlayer(current => current !== player);
-                },
                 async cost(event, trigger, player) {
                     event.result = await player.chooseTarget({
                         prompt: get.prompt2(event.skill),
-                        filterTarget: lib.filter.notMe,
                         ai(target) {
                             const player = get.player();
                             return get.attitude(player, target);
@@ -23576,9 +23572,11 @@ const packs = function () {
                     trigger.cancel();
                     const types = lib.inpile.map(name => get.type2(name)).toUniqued();
                     const typeList = types.map(type => [type, `${get.translation(type)}牌`]);
+                    const num = player == target ? 2 : 3;
                     const result = await player.chooseButton({
-                        createDialog: [`###竭情###请选择两种类型，令${get.translation(target)}从牌堆或弃牌堆中获得此类型的牌各一张`, [typeList, 'textbutton']],
-                        selectButton: 2,
+                        createDialog: [`###竭情###请选择至多${get.cnNumber(num)}种类型，令${get.translation(target)}从牌堆或弃牌堆中获得此类型的牌各一张`, [typeList, 'textbutton']],
+                        selectButton: [1, num],
+                        allowChooseAll: true,
                         forced: true,
                         ai(button) {
                             const { player, target } = get.event();
@@ -23632,7 +23630,7 @@ const packs = function () {
                             const storage = player.getStorage('wechatxhhxiangzhi_effect');
                             if (!storage.includes(event.player) || !event.targets?.length || !event.isFirstTarget) return false;
                             if (get.type(event.card) !== 'trick') return false;
-                            return ['direct', 'target', 'extra'].some(item => {
+                            return ['direct', 'target'/* , 'extra' */].some(item => {
                                 if (player.getStorage('wechatxhhxiangzhi_record').includes(item)) return false;
                                 if (item === 'target') {
                                     const info = get.info(event.card);
@@ -23654,7 +23652,7 @@ const packs = function () {
                             const choices = [
                                 ['direct', `令${str}不可被响应`],
                                 ['target', `为${str}增加一个目标`],
-                                ['extra', `令${str}对其中一个目标额外结算一次`],
+                                /*  ['extra', `令${str}对其中一个目标额外结算一次`], */
                             ].filter(item => {
                                 if (player.getStorage('wechatxhhxiangzhi_record').includes(item[0])) return false;
                                 return item[0] !== 'target' || list.length;
@@ -25627,11 +25625,11 @@ const packs = function () {
             wechatjueyi_info: '出牌阶段限一次，你可以失去1点体力并选择一项：1.摸三张牌；2.令手牌中随机X张伤害牌或回复牌额外结算一次（X为拥有“入枰”的角色数）。然后你可以令一名拥有“入枰”标记的其他角色获得你的一张手牌，若如此做，你下回合此技能改为“出牌阶段限两次”。',
             wechat_zhi_xiahouhui: '志夏侯徽',
             wechatjieqing: '竭情',
-            wechatjieqing_info: '你可以跳过摸牌阶段，令一名其他角色从牌堆或弃牌堆中获得你指定的两种类型的牌各一张。',
+            wechatjieqing_info: '你可以跳过摸牌阶段，令一名角色从牌堆或弃牌堆中获得你指定的至多X种类型的牌各一张（若你不为该角色，则X为3，否则X为2）。',
             wechatxhhxiangzhi: '襄智',
-            wechatxhhxiangzhi_info: '每轮开始时，你可以选择一名有手牌的角色，称为“襄智”角色。你观看其手牌，且当其本轮使用普通锦囊牌指定目标时，你可以选择本轮未选择过的一项：1.令此牌不可被响应；2.为此牌增加一个目标；3.令此牌对其中一个目标额外结算一次。',
+            wechatxhhxiangzhi_info: '每轮开始时，你可以选择一名有手牌的角色，称为“襄智”角色。你观看其手牌，且当其本轮使用普通锦囊牌指定目标时，你可以选择本轮未选择过的一项：1.令此牌不可被响应；2.为此牌增加一个目标。',
             wechatzheyuan: '折愿',
-            wechatzheyuan_info: `${get.poptip('rule_yizhiSkill')}，锁定技。当你死亡时，你令杀死你的角色：昔：将所有手牌交给你选择的一名角色；今：获得每名其他角色区域里的一张牌。你于“襄智”角色的回合内受到伤害时，其令你移志。`,
+            wechatzheyuan_info: `${get.poptip('rule_yizhiSkill')}，锁定技。当你死亡时，你令杀死你的角色：昔：将所有手牌交给你选择的一名角色；今：获得每名其他角色区域里的一张牌。你于“襄智”角色的回合内受到伤害时，其令你${get.poptip('rule_yizhi')}。`,
             wechat_yuwenyuejuanren: '语文阅卷人',
             wechatyuedu: '阅读',
             wechatyuedu_info: '每回合限一次，其他角色使用基本牌或普通锦囊牌结算结束后，你可以将此牌对应的所有实体牌置于武将牌上，称为“文章”。',
