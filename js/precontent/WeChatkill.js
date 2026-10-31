@@ -20589,7 +20589,7 @@ const packs = function () {
                         async cost(event, trigger, player) {
                             let result;
                             if (player.hasCards('h')) {
-                                result = await player.chooseCard('h',  get.prompt(event.skill), '重铸一张手牌获得1点谋略值（若此牌为【杀】则额外获得1点）').set('ai', card => {
+                                result = await player.chooseCard('h', lib.filter.cardRecastable, get.prompt(event.skill), '重铸一张手牌获得1点谋略值（若此牌为【杀】则额外获得1点）').set('ai', card => {
                                     if (get.event().goon) return 7 + (get.name(card) == 'sha' ? 2 : 0) - get.value(card);
                                     return 0;
                                 }).set('goon', (() => {
@@ -22970,6 +22970,7 @@ const packs = function () {
                                     const player = get.player();
                                     return get.effect(target, { name: 'guohe_copy', position: 'ej' }, player, player);
                                 },
+                                forced: true,
                             }).forResult();
                             if (result?.bool && result.targets?.length) {
                                 const target = result.targets[0];
@@ -22987,6 +22988,7 @@ const packs = function () {
                                     const player = get.player();
                                     return get.effect(target, { name: 'shunshou_copy', position: 'h' }, player, player);
                                 },
+                                forced: true,
                             }).forResult();
                             if (result?.bool && result.targets?.length) {
                                 const target = result.targets[0];
@@ -23125,9 +23127,6 @@ const packs = function () {
                 forceDie: true,
                 skillAnimation: true,
                 animationColor: 'wood',
-                check(event, player) {
-                    return game.hasPlayer(target => target !== player && get.attitude(player, target) > 0) ? 1 : 0;
-                },
                 async cost(event, trigger, player) {
                     event.result = await player.chooseTarget({
                         prompt: get.prompt2(event.skill),
