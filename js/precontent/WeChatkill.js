@@ -13342,7 +13342,7 @@ const packs = function () {
                     return targets.length;
                 },
                 async contentBefore(event, trigger, player) {
-                    if (player.isDamaged() && event.targets?.some(target => target.hasSex('male'))) {
+                    if (event.targets?.some(target => target.hasSex('male'))) {
                         const result = await player.chooseTarget((card, player, target) => {
                             return get.event().targets.includes(target) && target.hasSex('male');
                         }, `${get.translation(event.skill)}：是否令其中一名男性角色于结算中视为拥有【无双】？`).set('ai', target => {
@@ -13398,21 +13398,23 @@ const packs = function () {
             wechatsbbiyue: {
                 audio: 'sbbiyue',
                 trigger: { player: 'phaseJieshuBegin' },
-                async cost(event, trigger, player) {
-                    const num = Math.min(Math.max(game.countPlayer2(target => target.hasHistory('damage')), 1), 4);
-                    event.result = await player.chooseTarget(get.prompt(event.skill), (card, player, target) => {
-                        return target === player || target.countDiscardableCards(target, 'he');
-                    }, `选择令自己摸${get.cnNumber(num + 1)}张牌，或令一名其他角色弃置${get.cnNumber(num)}张牌`).set('ai', target => {
-                        const { player, num } = get.event();
-                        if (target === player) return get.effect(player, { name: 'draw' }, player, player) * (num + 1);
-                        return get.effect(target, { name: 'guohe_copy2' }, target, player) * Math.sqrt(Math.min(num, target.countDiscardableCards(target, 'he')));
-                    }).set('num', num).forResult();
-                },
+                forced: true,
                 async content(event, trigger, player) {
-                    const target = event.targets[0];
                     const num = Math.min(Math.max(game.countPlayer2(target => target.hasHistory('damage')), 1), 4);
-                    if (target === player) await player.draw(num + 1);
-                    else await target.chooseToDiscard('he', num, true);
+                    await player.draw(num + 1);
+                    if (game.hasPlayer(current => current != player && current.hasDiscardableCards(current, 'he'))) {
+                        const result = await player.chooseTarget((card, player, target) => {
+                            return target != player && target.hasDiscardableCards(target, 'he');
+                        }, `闭月：令一名其他角色弃置${get.cnNumber(num)}张牌`).set('ai', target => {
+                            const { player, num } = get.event();
+                            return get.effect(target, { name: 'guohe_copy2' }, target, player) * Math.sqrt(Math.min(num, target.countDiscardableCards(target, 'he')));
+                        }, true).set('num', num).forResult();
+                        if (result?.bool) {
+                            const target = result.targets[0];
+                            player.line(target);
+                            await target.chooseToDiscard('he', num, true, 'allowChooseAll');
+                        }
+                    }
                 },
             },
             // 极陆逊
@@ -25338,9 +25340,9 @@ const packs = function () {
             wechatsbjizhi_info: '锁定技，当你使用锦囊牌时，你摸一张牌。本回合你以此法获得的牌不计入你的手牌上限且你使用这些牌无任何次数限制。',
             wechat_sb_diaochan: '小程序谋貂蝉',
             wechatsblijian: '离间',
-            wechatsblijian_info: `出牌阶段限一次。你可以选择至少两名其他角色。然后每名你选择的角色依次视为对这些角色中与其逆时针座次最近的另一名角色使用一张【决斗】。若你已受伤，则你可以令其中一名男性目标角色于本次结算中获得${get.poptip('wushuang')}。`,
+            wechatsblijian_info: `出牌阶段限一次。你可以选择至少两名其他角色。然后每名你选择的角色依次视为对这些角色中与其逆时针座次最近的另一名角色使用一张【决斗】。且你可以令其中一名男性目标角色于本次结算中获得${get.poptip('wushuang')}。`,
             wechatsbbiyue: '闭月',
-            wechatsbbiyue_info: '结束阶段，你可以选择一项：①摸X+1张牌；②令一名其他角色弃置X张牌（X为本回合受伤角色数，至少为1，至多为4）。',
+            wechatsbbiyue_info: '结束阶段，你摸X+1张并令一名其他角色弃置X张牌（X为本回合受伤角色数，至少为1，至多为4）。',
             wechat_zhiyin_luxun: '极陆逊',
             wechatqianmou: '谦谋',
             wechatqianmou_info: `①游戏开始时，你可以弃置至多两张手牌，然后你获得3倍弃牌数的${get.poptip('rule_moulvenum')}。②当你的${get.poptip('rule_moulvenum')}或手牌数变化后，若二者数量相同，你摸两张牌。`,
