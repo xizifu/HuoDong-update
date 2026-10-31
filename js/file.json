@@ -6865,6 +6865,10 @@
             "size": 143068
         },
         {
+            "path": "image/character/Mbaby_xingdaorong.jpg",
+            "size": 153683
+        },
+        {
             "path": "image/character/Mbaby_xinpi.jpg",
             "size": 123317
         },
@@ -9410,7 +9414,7 @@
         },
         {
             "path": "js/precontent/MiNikill.js",
-            "size": 3079854
+            "size": 3082404
         },
         {
             "path": "js/precontent/MiNikill_sight.js",
@@ -9446,7 +9450,7 @@
         },
         {
             "path": "js/precontent/index.js",
-            "size": 44001
+            "size": 44022
         },
         {
             "path": "js/precontent/模板.js",

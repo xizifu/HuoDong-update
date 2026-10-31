@@ -821,7 +821,7 @@ export async function precontent(bilibilicharacter) {
                 data: (() => {
                     _status.HDWJ_ChangeLog_character = {
                         MiNiAppkill: Object.keys(MiNiAppkill().character),
-                        MiNikill: ['Mbaby_star_dongzhuo', 'Mbaby_star_sunjian', 'Mbaby_star_zhangzhao', 'Mbaby_zhanghu', 'Mbaby_yue_xiaoqiao', 'Mbaby_dc_sp_zhurong', 'Mbaby_shen_guojia', 'Mqing_lvdiao', 'Mbaby_feiyi', 'Mbaby_shen_pangtong', 'Mbaby_qiuliju', 'Mbaby_dc_huangwudie', 'Mbaby_ol_sb_xizhicai', 'Mfight_yuanshao', 'Myu_ganfuren', 'Myu_bianfuren', 'Myu_wuguotai', 'Myu_caifuren', 'Myin_jiaxu', 'Mbaby_ol_jiangwan', 'Mbaby_re_zhanggong', 'Mbaby_dc_sb_dengai'],
+                        MiNikill: ['Mbaby_star_dongzhuo', 'Mbaby_star_sunjian', 'Mbaby_star_zhangzhao', 'Mbaby_zhanghu', 'Mbaby_yue_xiaoqiao', 'Mbaby_dc_sp_zhurong', 'Mbaby_shen_guojia', 'Mqing_lvdiao', 'Mbaby_feiyi', 'Mbaby_shen_pangtong', 'Mbaby_qiuliju', 'Mbaby_dc_huangwudie', 'Mbaby_ol_sb_xizhicai', 'Mfight_yuanshao', 'Myu_ganfuren', 'Myu_bianfuren', 'Myu_wuguotai', 'Myu_caifuren', 'Myin_jiaxu', 'Mbaby_ol_jiangwan', 'Mbaby_re_zhanggong', 'Mbaby_dc_sb_dengai', 'Mbaby_xingdaorong'],
                         WeChatkill: ['wechat_sb_zhurong', 'wechat_zhi_yanghu', 'wechat_zhiyin_zhaoe', 'wechat_zhi_jiaxu', 'wechat_zhi_xiahouhui', 'wechat_yuwenyuejuanren', 'wechat_shuxueyazhouren', 'wechat_wenzongmingtizu', 'wechat_lizongshiyanyuan'],
                     };
                     return Object.values(_status.HDWJ_ChangeLog_character).flat();
