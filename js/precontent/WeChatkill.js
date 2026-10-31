@@ -190,7 +190,7 @@ const packs = function () {
             wechat_liubiao: ['male', 'qun', 3, ['wechatzishou', 'wechatzongshi']],
             wechat_re_liubiao: ['male', 'qun', 3, ['wechatrezishou', 'wechatrezongshi']],
             wechat_ruanji: ['male', 'wei', 3, ['wechatyonghuai', 'wechatqiongtu']],
-            wechat_ruanxian: ['male', 'wei', 3, ['wechatzhenglv', 'wechathanyin', 'wechatcibi']],
+            wechat_ruanxian: ['male', 'wei', 3, ['wechatzhenglv', 'wechathanyin', 'wechatcipi']],
             wechat_shantao: ['male', 'qun', 3, ['wechatjieshen', 'wechatqishi']],
             wechat_re_huangzhong: ['male', 'shu', 4, ['wechatreliegong']],
             wechat_yj_jushou: ['male', 'qun', 3, ['wechatxinjianying', 'wechatshibei']],
@@ -16781,19 +16781,27 @@ const packs = function () {
             //阮咸
             wechatzhenglv: {
                 audio: 'ext:活动武将/audio/skill:2',
+                onChooseToUse(event) {
+                    event.targetprompt2.add(target => {
+                        if (event.skill !== 'wechatzhenglv' || !target.classList.contains('selectable')) return;
+                        const num = event.player.countCards('h');
+                        const tnum = target.countCards('h');
+                        return num > tnum ? '摸牌' : '弃牌';
+                    });
+                },
                 enable: 'phaseUse',
                 filter(event, player) {
                     const num = player.countCards('h'), used = player.getStorage('wechatzhenglv_used');
-                    if (!used.includes('more') && game.hasPlayer(current => current != player && current.countCards('h') > num && current.hasCard(card => lib.filter.cardDiscardable(card, current, 'wechatzhenglv'), 'h'))) return true;
-                    if (!used.includes('less') && game.hasPlayer(current => current != player && current.countCards('h') < num)) return true;
-                    return false;
+                    if (used.length > 1) return false;
+                    return game.hasPlayer(current => {
+                        if (current == player) return false;
+                        return (!used.includes('more') && current.countCards('h') > num && current.countCards('h') > 0) || (!used.includes('less') && current.countCards('h') < num);
+                    });
                 },
                 filterTarget(card, player, target) {
                     const num = player.countCards('h'), used = player.getStorage('wechatzhenglv_used');
                     const tnum = target.countCards('h');
-                    if (tnum > num) return !used.includes('more') && target.hasCard(c => lib.filter.cardDiscardable(c, target, 'wechatzhenglv'), 'h');
-                    if (tnum < num) return !used.includes('less');
-                    return false;
+                    return (!used.includes('more') && tnum > num && tnum > 0) || (!used.includes('less') && tnum < num);
                 },
                 async content(event, trigger, player) {
                     const target = event.target;
@@ -16801,9 +16809,8 @@ const packs = function () {
                     player.addTempSkill(event.name + '_used', 'phaseUseEnd');
                     player.markAuto(event.name + '_used', [more ? 'more' : 'less']);
                     if (more) {
-                        if (!target.hasCard(c => lib.filter.cardDiscardable(c, target, 'wechatzhenglv'), 'h')) return;
-                        const res = await target.chooseToDiscard('h', true).forResult();
-                        if (!res?.bool || !res.cards?.length) return;
+                        if (!target.hasDiscardableCards(target, 'he')) return;
+                        await target.chooseToDiscard('he', true);
                     }
                     else await target.draw();
                     if (player.countCards('h') !== target.countCards('h')) return;
@@ -16815,7 +16822,7 @@ const packs = function () {
                     result: {
                         player(player, target) {
                             const more = target.countCards('h') - player.countCards('h') > 0;
-                            if (more) return get.effect(target, { name: 'guohe_copy', position: 'h' }, target, player) * (more === 1 ? 114514 : 1);
+                            if (more) return get.effect(target, { name: 'guohe_copy2' }, target, player) * (more === 1 ? 114514 : 1);
                             return get.effect(target, { name: 'draw' }, player, player) * (more === -1 ? 1919810 : 1);
                         },
                     },
@@ -16829,51 +16836,54 @@ const packs = function () {
             },
             wechathanyin: {
                 audio: 'ext:活动武将/audio/skill:2',
-                trigger: { player: 'useCard' },
+                trigger: { player: 'useCardAfter' },
                 filter(event, player) {
                     return event.card.name === 'jiu' && player.canMoveCard();
                 },
-                async cost(event, trigger, player) {
-                    event.result = await player.moveCard(get.prompt2(event.skill)).set('logSkill', event.skill).forResult();
-                },
-                popup: false,
+                direct: true,
                 async content(event, trigger, player) {
-                    const from = event.targets[0];
-                    if (from?.isIn()) await from.draw();
+                    const result = await player.moveCard(get.prompt2(event.name)).set('logSkill', event.name).forResult();
+                    if (result?.bool) {
+                        const from = result.targets[0];
+                        await from.draw();
+                    }
                 },
             },
-            wechatcibi: {
+            wechatcipi: {
                 audio: 'ext:活动武将/audio/skill:2',
                 trigger: {
-                    player: ['gainAfter', 'recoverBegin'],
+                    player: ['gainAfter', 'useCard'],
                     global: 'loseAsyncAfter',
                 },
                 filter(event, player) {
                     if (!game.hasPlayer(current => current !== player)) return false;
-                    const info = get.info('wechatcibi');
-                    if (event.name === 'recover') return true;
+                    const info = get.info('wechatcipi');
+                    if (event.name === 'useCard') return event.card.name === 'jiu';
                     if (event.getParent('phaseDraw', true)) return false;
-                    return event.getg?.(player)?.some(card => get.owner(card) === 'player' && 'he'.includes(get.position(card)));
+                    return event.getg?.(player)?.some(card => get.owner(card) === player && 'he'.includes(get.position(card)));
                 },
                 check(event, player) {
-                    if (event.name === 'recover' && player.isDying()) return false;
+                    if (event.name === 'useCard' && player.isDying()) return false;
                     let effect = get.recoverEffect(player, event.source || player, player) * (event.num || 1);
-                    if (event.name !== 'recover') {
-                        const cards = event.getg(player).filter(card => get.owner(card) === 'player' && 'he'.includes(get.position(card)));
+                    if (event.name !== 'useCard') {
+                        const cards = event.getg(player).filter(card => get.owner(card) === player && 'he'.includes(get.position(card)));
                         effect = cards.reduce((sum, card) => sum + get.value(card), 0);
                     }
                     return Math.max(...game.filterPlayer(current => current !== player).map(target => get.effect(target, { name: 'draw' }, player, player) * 2)) > effect;
                 },
                 prompt2(event, player) {
-                    let str = '放弃此次体力回复';
-                    if (event.name !== 'recover') str = `将${get.translation(event.getg(player).filter(card => get.owner(card) === 'player' && 'he'.includes(get.position(card))))}置入弃牌堆`;
-                    return `${str}，令一名其他角色摸两张牌`;
+                    let str = `令${get.translation(event.card)}无效`;
+                    if (event.name !== 'useCard') str = `将${get.translation(event.getg(player).filter(card => get.owner(card) === player && 'he'.includes(get.position(card))))}置入弃牌堆`;
+                    return `${str}，然后令一名其他角色摸两张牌`;
                 },
                 usable: 1,
                 async content(event, trigger, player) {
-                    if (trigger.name === 'recover') trigger.cancel();
+                    if (trigger.name === 'useCard') {
+                        trigger.targets.length = 0;
+                        trigger.all_excluded = true;
+                    }
                     else {
-                        const cards = trigger.getg(player).filter(card => get.owner(card) === 'player' && 'he'.includes(get.position(card)));
+                        const cards = trigger.getg(player).filter(card => get.owner(card) === player && 'he'.includes(get.position(card)));
                         if (!cards.length) return;
                         await player.loseToDiscardpile(cards);
                     }
@@ -25354,11 +25364,11 @@ const packs = function () {
             wechatqiongtu_info: `当你进入濒死状态时，若${get.poptip('wechatyonghuai')}剩余分支大于1，则你可以移去其中一个分支并将体力回复至1点，然后你令一名其他角色执行此分支的效果。`,
             wechat_ruanxian: '小程序阮咸',
             wechatzhenglv: '正律',
-            wechatzhenglv_info: '出牌阶段各限一次，你可以令一名手牌数大于/小于你的角色弃置一张手牌/摸一张牌，然后若你们手牌数相同，你视为使用一张【无中生有】/【酒】。',
+            wechatzhenglv_info: '出牌阶段各限一次，你可以令一名手牌数大于/小于你的角色弃置一张牌/摸一张牌，然后若你们手牌数相同，你视为使用一张【无中生有】/【酒】。',
             wechathanyin: '酣饮',
-            wechathanyin_info: '当你使用【酒】时，你可以移动场上区域的一张牌，然后失去其区域牌的角色摸一张牌。',
-            wechatcibi: '辞辟',
-            wechatcibi_info: '每回合限一次，当你摸牌阶段外获得牌或者回复体力时，你可以将获得的牌置入弃牌堆或者放弃回复体力，然后令一名其他角色摸两张牌。',
+            wechathanyin_info: '当你使用【酒】后，你可以移动场上的一张牌，然后令因此失去牌的角色摸一张牌。',
+            wechatcipi: '辞辟',
+            wechatcipi_info: '每回合限一次，当你摸牌阶段外获得牌或者使用【酒】时，你可以将获得的牌置入弃牌堆或者令此牌无效，然后令一名其他角色摸两张牌。',
             wechat_zhiyin_qinmi: '极秦宓',
             wechatgaogai: '高概',
             wechatgaogai_info: `锁定技。出牌阶段限一次，一名角色失去一种颜色的所有手牌后，你令其将手牌摸至X（X为你的体力上限），然后若场上有角色拥有与其中一种颜色的“天”标记，你摸两张牌。`,
