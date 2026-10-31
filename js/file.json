@@ -5585,6 +5585,10 @@
             "size": 93137
         },
         {
+            "path": "image/character/Mbaby_dc_sb_dengai.jpg",
+            "size": 149460
+        },
+        {
             "path": "image/character/Mbaby_dc_sb_liuxie.jpg",
             "size": 149272
         },
@@ -9406,7 +9410,7 @@
         },
         {
             "path": "js/precontent/MiNikill.js",
-            "size": 3077404
+            "size": 3079854
         },
         {
             "path": "js/precontent/MiNikill_sight.js",
@@ -9414,7 +9418,7 @@
         },
         {
             "path": "js/precontent/WeChatkill.js",
-            "size": 1558555
+            "size": 1558639
         },
         {
             "path": "js/precontent/WeChatkill_sight.js",
@@ -9442,7 +9446,7 @@
         },
         {
             "path": "js/precontent/index.js",
-            "size": 43979
+            "size": 44001
         },
         {
             "path": "js/precontent/模板.js",

@@ -23350,6 +23350,7 @@ const packs = function () {
                 },
                 forced: true,
                 async content(event, trigger, player) {
+                    if (game.countPlayer(target => target !== player) < 2) return;
                     const result = await player.chooseTarget({
                         prompt: `${get.translation(event.name)}：选择两名其他角色与你获得“入枰”标记`,
                         filterTarget: lib.filter.notMe,

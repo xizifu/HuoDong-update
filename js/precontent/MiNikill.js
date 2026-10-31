@@ -32,7 +32,7 @@ const packs = function () {
                 MiNi_sbCharacter: [
                     ...['xiahoudun', 'zhangjiao', 'zhenji', 'ganning', 'huangyueying', 'sunshangxiang', 'xuhuang', 'zhaoyun', 'liubei', 'caocao', 'huanggai', 'yuanshao', 'yujin', 'machao', 'lvmeng', 'huangzhong'].map(i => `sb_${i}`),
                     ...['xizhicai', 'huaxiong', 'guanyu'].map(i => `ol_sb_${i}`),
-                    ...['liuxie', 'xunyu', 'lusu', 'chengyu'].map(i => `dc_sb_${i}`),
+                    ...['dengai', 'liuxie', 'xunyu', 'lusu', 'chengyu'].map(i => `dc_sb_${i}`),
                     ...['guojia'].map(i => `yj_sb_${i}`),
                     ...[],
                 ].map(i => `Mbaby_${i}`),
@@ -159,6 +159,7 @@ const packs = function () {
             Mbaby_zhanghu: ['male', 'wei', 4, ['cuijian', 'minitongyuan']],
             Mbaby_ol_sb_xizhicai: ['male', 'wei', 3, ['olsbxinchuan', 'minisbjinjin']],
             Mbaby_re_zhanggong: ['male', 'wei', 3, ['minireqianxin', 'minizhenxing'], ['character:Mbaby_zhanggong']],
+            Mbaby_dc_sb_dengai: ['male', 'wei', 4, ['dcsbzhouxi', 'minishijin']],
             //蜀
             Mbaby_guanyu: ['male', 'shu', 4, ['miniwusheng']],
             Mbaby_re_guanyu: ['male', 'shu', 4, ['minirewusheng', 'minituodao', 'jsrgguanjue']],
@@ -8602,7 +8603,47 @@ const packs = function () {
                     ui[`minizhenxingUpdate`].observe(ui.cardPile, config);
                 },
             },
-            // 
+            // 谋邓艾
+            minishijin: {
+                audio: 'dcsbshijin',
+                inherit: 'dcsbshijin',
+                async content(event, trigger, player) {
+                    player.awakenSkill(event.name);
+                    await player.draw(2);
+                    player.addTempSkill('minishijin_defend', { player: 'phaseBeginStart' });
+                    player.when({ player: 'phaseBegin' }).step(async (event, trigger, player) => {
+                        const cards = player.getDiscardableCards(player, 'h').filter(card => get.name(card) === 'sha');
+                        if (cards.length) {
+                            await player.discard(cards);
+                            await player.loseHp(cards.length);
+                        } else {
+                            player.restoreSkill('minishijin');
+                            game.log(player, '重置了', '#g【恃矜】');
+                        }
+                    });
+                },
+                subSkill: {
+                    defend: {
+                        audio: 'minishijin',
+                        charlotte: true,
+                        mark: true,
+                        intro: { content: '受到伤害时，防止之并摸一张牌' },
+                        trigger: { player: 'damageBegin3' },
+                        forced: true,
+                        async content(event, trigger, player) {
+                            trigger.cancel();
+                            await player.draw();
+                        },
+                        ai: {
+                            filterDamage: true,
+                            skillTagFilter(player, tag, arg) {
+                                if (arg?.player?.hasSkillTag('jueqing', false, player)) return false;
+                            },
+                        },
+                    },
+                },
+
+            },
             //蜀
             //关羽
             miniwusheng: {
@@ -48114,6 +48155,7 @@ const packs = function () {
             Mbaby_zhanghu: '欢杀张虎',
             Mbaby_ol_sb_xizhicai: '欢杀谋戏志才',
             Mbaby_re_zhanggong: '欢杀界张恭',
+            Mbaby_dc_sb_dengai: '欢杀谋邓艾',
             miniluoshen: '洛神',
             miniluoshen_info: '准备阶段，你可以进行一次判定并获得判定牌，若判定结果为黑色，你可重复此流程。',
             minireluoshen: '洛神',
@@ -48431,6 +48473,8 @@ const packs = function () {
             minireqianxin_info: '出牌阶段限两次，你可将一张手牌交给一名其他角色，称为“信”。一名角色摸到“信”或其准备阶段开始时手牌中有“信”，则其选择一项：1.令你摸两张牌；2.本回合手牌上限-2。',
             minizhenxing: '镇行',
             minizhenxing_info: '结束阶段开始时或当你受到伤害后，你可以观看牌堆顶的至多三张牌，然后你获得其中与其余牌花色均不相同的一张牌，并将其余牌标记为“信”，然后随机插入牌堆中。',
+            minishijin: '恃矜',
+            minishijin_info: '限定技，出牌阶段，若你本回合造成过伤害，你可以摸两张牌，且直到你的下个回合开始前，你受到伤害时防止之并摸一张牌。你的下个回合开始时，弃置所有【杀】并失去等量体力，若你未因此失去体力，此技能视为未发动过。',
             //蜀
             Mbaby_guanyu: '欢杀关羽',
             Mbaby_re_guanyu: '欢杀界关羽',
