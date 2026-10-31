@@ -47637,8 +47637,9 @@ const packs = function () {
                     target: 'useCardToTargeted',
                 },
                 filter(event, player, name) {
-                    const type = get.type(event.card);
-                    const storage = player.getStorage('miniyushiyu', new Map()).get(event.player) || [];
+                    if (event.player == player) return false;
+                    const type = get.type2(event.card);
+                    const storage = player.getStorage('miniyushiyu_used', new Map()).get(event.player) || [];
                     if (!['basic', 'equip', 'trick'].includes(type) || storage.includes(type)) return false;
                     if (name == 'useCard') return type == 'equip';
                     if (name == 'useCardAfter') return type == 'basic' && event.cards.someInD();
@@ -47647,7 +47648,7 @@ const packs = function () {
                 forced: true,
                 logTarget: 'player',
                 async content(event, trigger, player) {
-                    const type = get.type(trigger.card);
+                    const type = get.type2(trigger.card);
                     const target = event.targets[0];
                     const effect = event.name + '_used';
                     const storage = player.getStorage(effect, new Map());
@@ -47721,7 +47722,7 @@ const packs = function () {
                                 const skill = event.name + '_used';
                                 const losers = [target, target2].filter(current => current != player && !player.getStorage(skill).includes(current) && current != result?.winner);
                                 if (losers.length) {
-                                    const cards = [result.target, result.target2].filterInD('d');
+                                    const cards = [result.player, result.target].filterInD('d');
                                     result = await player.chooseBool(`是否清除${get.translation(losers)}的“势语”记录${cards.length ? `并获得${get.translation(cards)}` : ''}`).forResult();
                                     if (result?.bool) {
                                         const storage = player.getStorage('miniyushiyu_used', new Map());
@@ -47752,31 +47753,31 @@ const packs = function () {
                     globalFrom(from, to) {
                         if (to.isDamaged()) return -Infinity;
                     },
-                    trigger: { target: 'useCardToTargeted' },
-                    filter(event, player) {
-                        return event.player != player && get.color(event.card) == 'black' && event.cards.someInD();
-                    },
-                    forced: true,
-                    prompt2(event, player) {
-                        return `获得${get.translation(event.cards.filterInD())}`
-                    },
-                    check(event, player) {
-                        return get.value(event.cards.filterInD()) > 0;
-                    },
-                    async content(event, trigger, player) {
-                        await player.gain(trigger.cards.filterInD(), 'gain2');
-                        const target = trigger.player;
-                        if (player.getHp() == target.getDamagedHp() && player.hasCards('he')) {
-                            const result = await player.chooseToDiscard('娇吟：是否弃置一张牌令' + get.translation(trigger.card) + '对你无效？', 'he').set('ai', function (card) {
-                                if (get.event().goon) return 7 - get.value(card);
-                                return 0;
-                            }).set('goon', get.effect(player, trigger.card, target, player) < 0).forResult();
-                            if (result?.bool) {
-                                trigger.excluded.push(player);
-                                game.log(trigger.card, '对', player, '无效');
-                            }
+                },
+                trigger: { target: 'useCardToTargeted' },
+                filter(event, player) {
+                    return event.player != player && get.color(event.card) == 'black' && event.cards.someInD();
+                },
+                forced: true,
+                prompt2(event, player) {
+                    return `获得${get.translation(event.cards.filterInD())}`;
+                },
+                check(event, player) {
+                    return get.value(event.cards.filterInD()) > 0;
+                },
+                async content(event, trigger, player) {
+                    await player.gain(trigger.cards.filterInD(), 'gain2');
+                    const target = trigger.player;
+                    if (player.getHp() == target.getDamagedHp() && player.hasCards('he')) {
+                        const result = await player.chooseToDiscard('娇吟：是否弃置一张牌令' + get.translation(trigger.card) + '对你无效？', 'he').set('ai', function (card) {
+                            if (get.event().goon) return 7 - get.value(card);
+                            return 0;
+                        }).set('goon', get.effect(player, trigger.card, target, player) < 0).forResult();
+                        if (result?.bool) {
+                            trigger.getParent().excluded.add(player);
+                            game.log(trigger.card, '对', player, '无效');
                         }
-                    },
+                    }
                 },
             },
             miniyumeiyu: {
@@ -50521,7 +50522,7 @@ const packs = function () {
                 return `每回合限三次，当一张${suits}伤害牌结算后，若你造成或受到此牌造成的伤害，你可以从牌堆或弃牌堆中随机获得与此牌花色各不相同的牌各一张。`;
             })(),
             miniyushiyu: '势语',
-            miniyushiyu_info: '锁定技。每名角色每种类型限一次。其他角色使用：基本牌结算后，你获得此牌对应的所有实体牌；锦囊牌令你成为目标后，此牌对你无效；装备牌时，改为对你使用之。',
+            miniyushiyu_info: '锁定技。每名其他角色每种类型限一次。当其他角色使用：基本牌结算后，你获得此牌对应的所有实体牌；锦囊牌令你成为目标后，此牌对你无效；装备牌时，改为对你使用之。',
             miniyuquanyu: '权御',
             miniyuquanyu_info: (() => {
                 let suits = ['heart', 'diamond', 'spade', 'club'].filter(suit => (game.getExtensionConfig('活动武将', `miniyuquanyu_suit`) || ['diamond']).includes(suit)).map(suit => get.translation(suit)).join('');
