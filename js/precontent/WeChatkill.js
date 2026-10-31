@@ -24365,7 +24365,7 @@ const packs = function () {
                     event.result = await player.chooseTarget(get.prompt2(event.skill)).set('ai', target => {
                         const player = get.player();
                         const eff1 = get.effect(target, { name: 'shunshou_copy', position: 'hej' }, player, player);
-                        const eff2 = get.effect(target, { name: 'draw' }, player, player) * player.hujia;
+                        const eff2 = get.effect(target, { name: 'draw' }, player, player) * (player.hujia - 1);
                         return Math.max(eff1, eff2);
                     }).forResult();
                 },
@@ -24375,6 +24375,7 @@ const packs = function () {
                     const num = player.hujia;
                     let result;
                     const goon = target.hasCards('hej');
+                    if (!goon && !num) return;
                     if (goon && num > 0) {
                         result = await player.chooseControl().set('choiceList', [`${target.hasCards('h') ? `观看${get.translation(target)}手牌并` : ''}获得其区域内的一张牌`, `令其摸${get.cnNumber(num)}张牌`]).set('ai', () => {
                             const { player, target } = get.event();
