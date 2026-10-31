@@ -15154,7 +15154,7 @@ const packs = function () {
             // 极诸葛恪
             wechatxingbi: {
                 audio: 'ext:活动武将/audio/skill:2',
-                trigger: { player: ['useCardAfter'] },
+                trigger: { player: 'useCard' },
                 filter(event, player) {
                     if (event.card.name != 'sha' && get.type2(event.card) != 'trick') return false;
                     const num = player.countMark('wechatxingbi_record');
@@ -15264,15 +15264,15 @@ const packs = function () {
                 audio: 'ext:活动武将/audio/skill:2',
                 trigger: { player: 'useCardToPlayered' },
                 filter(event, player) {
-                    return get.tag(event.card, 'damage');
+                    return get.is.damageCard(event.card);
                 },
                 forced: true,
                 async content(event, trigger, player) {
                     const targets = game.filterPlayer(current => !current.isLinked());
-                    if (!targets.length) await player.damage();
+                    if (!targets.length) await player.damage('fire');
                     else {
                         const result = targets.length == 1 ? { bool: true, targets } : await player.chooseTarget('令一名角色横置', (card, player, target) => {
-                            return !target.isLinked()
+                            return !target.isLinked();
                         }, true).set('ai', target => {
                             const player = get.player();
                             return get.effect(target, { name: 'tiesuo' }, player, player);
@@ -25295,11 +25295,11 @@ const packs = function () {
             wechatsbtongye_info: '锁定技。结束阶段，你猜测场上装备牌数与你下一个准备阶段的场上装备牌数是否相等，并获得以下效果：你下一个准备阶段，若你猜对且“业”数小于2，你获得1枚“业”。',
             wechat_zhiyin_zhugeke: '极诸葛恪',
             wechatxingbi: '兴愎',
-            wechatxingbi_info: `锁定技。当你使用【杀】或锦囊牌后，你依次执行本轮未被执行的一项：1.获得两张你手牌中缺少类型的牌；2.重铸任意张同类型牌；3.获得${get.poptip('wechatchizu')}并横置。`,
+            wechatxingbi_info: `锁定技。当你使用【杀】或锦囊牌时，你依次执行本轮未被执行的一项：1.获得两张你手牌中缺少类型的牌；2.重铸任意张同类型牌；3.获得${get.poptip('wechatchizu')}并横置。`,
             wechatxiangke: '飨恪',
             wechatxiangke_info: '当你装备区牌数发生变化后，你可以将手牌数调整至X，然后你可以对一名体力值为X的角色造成1点火焰伤害（X为你的装备区牌数）。',
             wechatchizu: '赤族',
-            wechatchizu_info: '锁定技。当你使用伤害牌指定目标后，若所有角色均横置，你受到1点伤害，否则你令一名角色横置。',
+            wechatchizu_info: '锁定技。当你使用伤害牌指定目标后，若所有角色均横置，你受到1点火焰伤害，否则你令一名角色横置。',
             wechat_liubiao: '小程序刘表',
             wechatzishou: '自守',
             wechatzishou_info: '摸牌阶段，你可以额外摸三张牌。然后你本回合不能其他角色使用牌。',
