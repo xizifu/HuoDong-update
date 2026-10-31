@@ -96,7 +96,7 @@ const packs = function () {
                                 const card = trigger.cards[0], source = trigger.source;
                                 if (get.owner(card) === player && get.position(card) === 'h' && source?.isIn() && player.getHp() < source.getHp() && player.canUse(card, source, false)) {
                                     const result = await player.chooseBool(`${get.translation(event.name)}：是否对${get.translation(source)}使用${get.translation(card)}？`).set('choice', (() => {
-                                        return get.effect(card, source, player, player) > 0;
+                                        return get.effect(source, card, player, player) > 0;
                                     })()).forResult();
                                     if (result?.bool) await player.useCard(card, source, false).set('cards', [card]);
                                 }
@@ -667,12 +667,12 @@ const packs = function () {
                             return get.unuseful(card) + 9;
                         },
                         filterTarget(card, player, target) {
-                            const trigger = get.event().getTrigger;
+                            const trigger = get.event().getTrigger();
                             if (!player.inRange(target) || target === player || target === trigger.player) return false;
                             return lib.filter.targetEnabled(trigger.card, trigger.player, target);
                         },
                         ai2(target) {
-                            const player = get.player(), trigger = get.event().getTrigger;
+                            const player = get.player(), trigger = get.event().getTrigger();
                             return get.effect(target, trigger.card, trigger.player, player) - get.effect(player, trigger.card, trigger.player, player);
                         },
                     }).setHiddenSkill(event.skill).forResult();
@@ -1670,7 +1670,7 @@ const packs = function () {
                 logAudio: () => 1,
                 trigger: { player: 'phaseUseBegin' },
                 filter(event, player) {
-                    return player.countCards('h') > 0;
+                    return player.hasCards('h');
                 },
                 async cost(event, trigger, player) {
                     event.result = await player.chooseCard(get.prompt(event.skill), '展示一张手牌，本回合你可以将一张与此牌颜色不同的牌当做【决斗】使用').set('ai', card => {
@@ -1696,13 +1696,13 @@ const packs = function () {
                             if (eff1 > eff2) effect += eff1 - eff2;
                         }
                         return effect;
-                    }).set('goon', player.hasValueTarget({ name: 'juedou' }) && !player.hasSkill('shuangxiong_viewas')).forResult();
+                    }).set('goon', player.hasValueTarget({ name: 'juedou' }) && !player.hasSkill('mpshuangxiong_viewas')).forResult();
                 },
                 async content(event, trigger, player) {
                     const { cards } = event, color = get.color(cards[0], player);
                     await player.showCards(cards, `${get.translation(player)}发动了【${get.translation(event.name)}】`);
-                    player.addTempSkill('shuangxiong_viewas');
-                    player.markAuto('shuangxiong_viewas', [color]);
+                    player.addTempSkill('mpshuangxiong_viewas');
+                    player.markAuto('mpshuangxiong_viewas', [color]);
                 },
                 subfrequent: ['jianxiong'],
                 group: 'mpshuangxiong_jianxiong',
@@ -1714,7 +1714,7 @@ const packs = function () {
                             const evt = event.getParent();
                             if (evt.type !== 'card' || evt.name !== 'juedou') return false;
                             const evtx = event.getParent(2);
-                            if (evtx.skill !== 'shuangxiong_viewas' || evtx.player !== player) return false;
+                            if (evtx.skill !== 'mpshuangxiong_viewas' || evtx.player !== player) return false;
                             return evt[player === evt.player ? 'targetCards' : 'playerCards']?.someInD('od');
                         },
                         prompt2(event, player) {
@@ -1727,6 +1727,43 @@ const packs = function () {
                             await player.gain(evt[player === evt.player ? 'targetCards' : 'playerCards'].filterInD('od'), 'gain2');
                         },
                     },
+                    viewas: {
+                        charlotte: true,
+                        onremove: true,
+                        audio: 'shuangxiong',
+                        logAudio: () => 'shuangxiong2.mp3',
+                        enable: 'chooseToUse',
+                        viewAs: { name: 'juedou' },
+                        position: 'hes',
+                        viewAsFilter(player) {
+                            return player.hasCard(card => lib.skill.mpshuangxiong_viewas.filterCard(card, player), "hs");
+                        },
+                        filterCard(card, player) {
+                            const color = get.color(card), colors = player.getStorage('mpshuangxiong_viewas');
+                            for (const i of colors) {
+                                if (color != i) return true;
+                            }
+                            return false;
+                        },
+                        prompt() {
+                            const colors = _status.event.player.getStorage('mpshuangxiong_viewas');
+                            let str = '将一张颜色';
+                            for (let i = 0; i < colors.length; i++) {
+                                if (i > 0) str += '或';
+                                str += '不为';
+                                str += get.translation(colors[i]);
+                            }
+                            str += '的牌当做【决斗】使用';
+                            return str;
+                        },
+                        check(card) {
+                            const player = get.player();
+                            const raw = player.getUseValue(card, null, true);
+                            const eff = player.getUseValue(get.autoViewAs({ name: 'juedou' }, [card]));
+                            return eff - raw;
+                        },
+                        ai: { order: 7 },
+                    }
                 },
             },
             //袁绍
@@ -3222,7 +3259,7 @@ const packs = function () {
                             if (cardsx.length > 1) {
                                 result = await player.chooseButton(['匡弼：移去一张同颜色的"匡弼"牌', cards], true).set('filterButton', button => {
                                     return get.color(button.link) === get.event().color;
-                                }).set('suit', color).forResult();
+                                }).set('color', color).forResult();
                             }
                             else if (cardsx.length === 1) result = { bool: true, links: cardsx };
                             else result = { bool: false, links: [cards.randomGet()] };
