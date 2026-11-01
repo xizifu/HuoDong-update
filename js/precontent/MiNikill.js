@@ -50569,7 +50569,7 @@ const packs = function () {
                 return `锁定技。①准备阶段或结束阶段，你令一名角色摸两张牌，称为“贤御”牌。②有“贤御”牌的角色使用的${suits}牌不能被响应。③当你造成或受到伤害后，你弃置所有角色的非${suits}“贤御”牌。`;
             })(),
             miniyuqingxiao: '清啸',
-            miniyuqingxiao_info: '出牌阶段限一次，你可以观看并分配牌堆或弃牌堆中随机三张牌。若获得牌的角色数或因此获得牌的角色各获得的牌数：为1，因此获得牌的角色各失去1点体力；均不为1，你失去1点体力。',
+            miniyuqingxiao_info: '出牌阶段限一次，你可以观看并分配牌堆或弃牌堆中随机三张伤害牌。若因此获得牌的角色数或因此获得牌的角色各获得的牌数：为1，因此获得牌的角色各失去1点体力；均不为1，你回复1点体力。',
             miniyulingyu: '聆御',
             miniyulingyu_info: (() => {
                 let suits = ['heart', 'diamond', 'spade', 'club'].filter(suit => (game.getExtensionConfig('活动武将', `miniyulingyu_suit`) || ['club']).includes(suit)).map(suit => get.translation(suit)).join('');
