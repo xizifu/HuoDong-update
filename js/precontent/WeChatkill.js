@@ -13399,6 +13399,7 @@ const packs = function () {
                 audio: 'sbbiyue',
                 trigger: { player: 'phaseJieshuBegin' },
                 forced: true,
+                locked: false,
                 async content(event, trigger, player) {
                     const num = Math.min(Math.max(game.countPlayer2(target => target.hasHistory('damage')), 1), 4);
                     await player.draw(num + 1);
@@ -23418,7 +23419,6 @@ const packs = function () {
                         filter(event, player) {
                             return event.source?.hasMark('wechatruping') && event.player.hasMark('wechatruping');
                         },
-                        direct: true,
                         forced: true,
                         async content(event, trigger, player) {
                             const result = await player.chooseTarget({
