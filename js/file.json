@@ -8405,6 +8405,10 @@
             "size": 164021
         },
         {
+            "path": "image/character/wechat_sb_caoren.jpg",
+            "size": 219327
+        },
+        {
             "path": "image/character/wechat_sb_diaochan.jpg",
             "size": 205169
         },
@@ -9422,7 +9426,7 @@
         },
         {
             "path": "js/precontent/WeChatkill.js",
-            "size": 1565675
+            "size": 1565668
         },
         {
             "path": "js/precontent/WeChatkill_sight.js",
@@ -9450,7 +9454,7 @@
         },
         {
             "path": "js/precontent/index.js",
-            "size": 44061
+            "size": 44064
         },
         {
             "path": "js/precontent/模板.js",
