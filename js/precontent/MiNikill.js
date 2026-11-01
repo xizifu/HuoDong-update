@@ -901,6 +901,20 @@ const packs = function () {
                 filterTarget: true,
                 async content(event, trigger, player) { },
                 global: 'miniyinyince_real',
+                ai: {
+                    basic: {
+                        order: 10,
+                        useful: 7,
+                        value(card, player) {
+                            return player.hasSkill('miniyinyince') ? 10 : -10;
+                        },
+                    },
+                    result: {
+                        target(player, target) {
+                            return Math.random() * 2 - 1;
+                        }
+                    },
+                },
             }
         },
         skill: {
@@ -46703,12 +46717,30 @@ const packs = function () {
                         complexSelect: true,
                         selectTarget: () => ui.selected.cards.length,
                         ai1(card) {
-                            return 6 - get.value(card);
+                            const player = get.player();
+                            const num = Math.min(game.countPlayer(), player.countCards('h'));
+                            if (ui.selected.cards.length >= num) return 0;
+                            if (!ui.selected.cards.length && player.hasSkill('miniyinshenmou')) {
+                                const type = get.type(card);
+                                const bool = player.storage.miniyinshenmou;
+                                if ((type == 'basic' && !bool) || (type !== 'basic' && bool)) return 114514;
+                                return 1 / Math.max(0.1, get.value(card));
+                            }
+                            return 1 / Math.max(0.1, get.value(card));
                         },
                         ai2(target) {
                             const player = get.player();
-                            return -get.attitude(player, target);
-                        }
+                            let card = ui.selected.cards[ui.selected.targets.length];
+                            if (!card) return 0;
+                            if (ui.selected.targets.length == 0 && player.hasSkill('miniyinshenmou') && player == target) return 114514;
+                            if (get.value(card) < 0) return -1;
+                            if (get.value(card) < 1.5) return (get.sgnAttitude(player, target) + 0.01) / 5;
+                            return Math.sqrt(5 - Math.min(4, target.countCards('h')));
+                        },
+                        targetprompt() {
+                            const links = ui.selected.cards;
+                            return ['获得', get.translation(links[ui.selected.targets.length - 1])].join('<br>');
+                        },
                     }).forResult();
                 },
                 async content(event, trigger, player) {
@@ -46771,7 +46803,7 @@ const packs = function () {
                                 ui.create.buttonPresets = {
                                     ...others,
                                     card(item, ...args) {
-                                        return [item.classList.contains(skill) ? 'blank' : 'card'](item, ...args);
+                                        return item.classList.contains(skill) ? blank(item, ...args) : card(item, ...args);
                                     },
                                     blank,
                                 };
@@ -46858,14 +46890,16 @@ const packs = function () {
                         async content(event, trigger, player) {
                             const card = trigger.cards[0];
                             const { targets: [target] } = trigger;
-                            const info = get.info(card);
-                            if (!info || info.notarget || !info.filterTarget) {
-                                await game.cardsDiscard(trigger.cards);
-                                return;
-                            }
                             trigger.card.name = card.name;
                             trigger.card.nature = card.nature;
                             trigger.card.suit = card.suit;
+                            trigger.card.color = get.color(card);
+                            const info = get.info(card);
+                            if (!info || info.notarget || !info.filterTarget || !lib.filter.targetEnabled2(card, player, target)) {
+                                await game.cardsDiscard(trigger.cards);
+                                game.log(trigger.cards, '被置入了弃牌堆');
+                                return;
+                            }
                             if (get.type(card) == 'equip') trigger.player = target;
                         },
                     }
@@ -46873,6 +46907,15 @@ const packs = function () {
             },
             miniyinshenmou: {
                 audio: 'ext:活动武将/audio/skill:2',
+                mod: {
+                    aiOrder(player, card, num) {
+                        if (typeof card == 'object') {
+                            const type = get.type(card);
+                            const bool = player.storage.miniyinshenmou;
+                            if ((type == 'basic' && !bool) || (type !== 'basic' && bool)) return num + 10;
+                        }
+                    },
+                },
                 mark: true,
                 zhuanhuanji: true,
                 marktext: '☯',
@@ -46883,9 +46926,9 @@ const packs = function () {
                 },
                 trigger: { player: ['useCardAfter', 'respondAfter'] },
                 filter(event, player) {
-                    const type = get.type(event.card)
+                    const type = get.type(event.card);
                     const bool = player.storage.miniyinshenmou;
-                    return (type == 'basic' && !bool) | (type !== 'basic' && bool);
+                    return (type == 'basic' && !bool) || (type !== 'basic' && bool);
                 },
                 forced: true,
                 async content(event, trigger, player) {
@@ -46909,8 +46952,19 @@ const packs = function () {
                             }).forResult();
                             if (result?.cards?.length && result.targets.length) {
                                 const { cards, targets: [target] } = result;
-                                const next = player.give(cards, target);
+                                target.addSkill('miniyinyince_effect');
+                                const next = target.gain(cards);
+                                next.giver = player;
+                                next.source = player;
                                 next.gaintag.add('miniyinyince');
+                                next.set('animate', event => {
+                                    const { player, giver } = event;
+                                    const cards = event.cards;
+                                    const num = cards.length;
+                                    player.$draw(cards.length);
+                                    game.log(giver, '交给了', player, get.cnNumber(num), '张“隐策”牌');
+                                    return 500;
+                                });
                                 await next;
                             }
                         }
