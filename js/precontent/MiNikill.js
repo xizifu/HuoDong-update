@@ -47754,7 +47754,7 @@ const packs = function () {
                     const suits = game.getExtensionConfig('活动武将', `miniyuquanyu_suit`) || ['diamond'];
                     if (!target.hasCards('h', card => suits.includes(get.suit(card)))) await player.viewHandcards(target);
                     else {
-                        let result = await player.choosePlayerCard(target, 'h', true, `权御：请选择其中一张${suits.map(suit => get.translation(suit)).join('、')}牌并令${get.translation(target)}用此牌与你选择的一名角色拼点`).set('filterButton', button => {
+                        let result = await player.choosePlayerCard(target, 'h', true, `权御：请选择其中一张${suits.map(suit => get.translation(suit)).join('、')}牌并令${get.translation(target)}用此牌与你选择的一名角色拼点`, 'visible').set('filterButton', button => {
                             const suit = get.suit(button.link);
                             return get.event().suits?.includes(suit);
                         }).set('suits', suits).set('ai', button => {
