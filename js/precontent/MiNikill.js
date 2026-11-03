@@ -34272,8 +34272,8 @@ const packs = function () {
                 audio: 'ol_wuqian',
                 trigger: { player: 'useCardToPlayered' },
                 filter(event, player) {
-                    if (_status.currentPhase !== player || !['sha', 'juedou'].includes(event.card.name)) return false;
-                    return player.getHistory('useCard', function (evt) {
+                    if (!['sha', 'juedou'].includes(event.card.name)) return false;
+                    return player.getHistory('useCard', evt => {
                         return (evt.card.name == 'sha' || evt.card.name == 'juedou');
                     }).indexOf(event.getParent()) == 0;
                 },
@@ -34304,6 +34304,42 @@ const packs = function () {
                         return false;
                     },
                 },
+                group: ['miniwuqian_gain', 'miniwuqian_add'],
+                subSkill: {
+                    gain: {
+                        audio: 'miniwuqian',
+                        trigger: { player: 'phaseBegin' },
+                        forced: true,
+                        async content(event, trigger, player) {
+                            const card = get.cardPile(card => get.type(card) == 'basic');
+                            if (card) await player.gain(card, 'gain2');
+                        },
+                    },
+                    add: {
+                        audio: 'miniwuqian',
+                        trigger: { player: 'useCard2' },
+                        filter(event, player) {
+                            if (!['sha', 'juedou'].includes(event.card.name)) return false;
+                            if (!game.hasPlayer(current => !event.targets.includes(current) && lib.filter.targetEnabled2(event.card, player, current))) return false;
+                            return player.getHistory('useCard', evt => {
+                                return (evt.card.name == 'sha' || evt.card.name == 'juedou');
+                            }).indexOf(event) == 0;
+                        },
+                        async cost(event, trigger, player) {
+                            event.result = await player.chooseTarget(get.prompt(event.skill), `为${get.translation(trigger.card)}添加一个目标`, (card, player, target) => {
+                                const evt = _status.event.getTrigger();
+                                return !evt.targets.includes(target) && lib.filter.targetEnabled2(evt.card, player, target);
+                            }).set("ai", target => {
+                                return get.effect(target, _status.event.getTrigger().card, get.player());
+                            }).forResult();
+                        },
+                        async content(event, trigger, player) {
+                            const targets = event.targets;
+                            player.line(targets, 'green');
+                            trigger.targets.addArray(targets);
+                        },
+                    }
+                }
             },
             minishenfen: {
                 limited: true,
@@ -34349,6 +34385,7 @@ const packs = function () {
                         }
                     }
                     await game.delayx();
+                    player.addSkill(event.name + '_restore');
                 },
                 ai: {
                     order: 10,
@@ -34362,6 +34399,21 @@ const packs = function () {
                         },
                     },
                 },
+                subSkill: {
+                    restore: {
+                        charlotte: true,
+                        audio: 'minishenfen',
+                        trigger: { global: 'phaseEnd' },
+                        filter(event, player) {
+                            return player.isHealthy();
+                        },
+                        forced: true,
+                        async content(event, trigger, player) {
+                            player.removeSkill(event.name);
+                            player.refreshSkill('minishenfen');
+                        },
+                    }
+                }
             },
             minishelie: {
                 audio: 'ext:活动武将/audio/skill:2',
@@ -50072,9 +50124,9 @@ const packs = function () {
             Mbaby_shen_weiyan: '欢杀神魏延',
             Mbaby_shen_zhonghui: '欢杀神钟会',
             miniwuqian: '无前',
-            miniwuqian_info: '锁定技，当你于回合内第一次使用【杀】或【决斗】指定目标后，则你令此牌无视目标角色的防具且视为具有〖无双〗效果。',
+            miniwuqian_info: '锁定技。①回合开始时，你获得一张基本牌。②你每回合使用的首张【杀】或【决斗】的目标数+1，且指定目标后，你令此牌无视目标角色的防具且视为具有〖无双〗效果。',
             minishenfen: '神愤',
-            minishenfen_info: '限定技，出牌阶段，你可以失去3点体力，对所有其他角色各造成1点伤害。这些角色依次弃置装备区内的所有牌，然后依次弃置四张手牌。',
+            minishenfen_info: '限定技，出牌阶段，你可以失去3点体力，对所有其他角色各造成1点伤害。这些角色依次弃置装备区内的所有牌，然后依次弃置四张手牌。一名角色的回合结束时，若你未受伤，此技能视为未发动过。',
             minishelie: '涉猎',
             minishelie_info: '锁定技，摸牌阶段，你放弃摸牌，改为亮出牌堆顶的五张牌，并获得其中不同花色的牌各一张。',
             minigongxin: '攻心',
