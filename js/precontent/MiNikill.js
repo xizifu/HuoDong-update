@@ -138,7 +138,7 @@ const packs = function () {
             Mbaby_caimaozhangyun: ['male', 'wei', 4, ['minilianzhou', 'minijilang']],
             Mbaby_xinpi: ['male', 'wei', 3, ['minichijie', 'yinju']],
             Mbaby_dukui: ['male', 'wei', 3, ['minifanyin', 'minipeiqi']],
-            Mbaby_zhugeruoxue: ['female', 'wei', 3, ['miniqiongying', 'dcnuanhui'], ['name:诸葛|若雪', 'clan:琅琊诸葛氏']],
+            Mbaby_zhugeruoxue: ['female', 'wei', 3, ['miniqiongying', 'mininuanhui'], ['name:诸葛|若雪', 'clan:琅琊诸葛氏']],
             Mbaby_star_xunyu: ['male', 'wei', 3, ['minianshu', 'starkuangzuo'], ['clan:颍川荀氏']],
             Mbaby_dc_jiachong: ['male', 'wei', 3, ['minibeini', 'minishizong'], ['border:jin']],
             Mbaby_ol_xunyu: ['male', 'wei', 3, ['minirequhu', 'minirejieming'], ['clan:颍川荀氏', 'character:Mbaby_xunyu']],
@@ -6892,29 +6892,185 @@ const packs = function () {
             //诸葛若雪
             miniqiongying: {
                 audio: 'dcqiongying',
-                inherit: 'dcqiongying',
-                async content(event, trigger, player) {
-                    event.pushHandler('onNextMoveCard', (event, option) => {
-                        if (_status.connectMode && event.step == 1 && event._result.bool && option.state == 'end') {
-                            game.broadcastAll(() => {
-                                delete _status.noclearcountdown;
-                                game.stopCountChoose();
-                            });
-                        }
-                    });
-                    const result = await player.moveCard(false, `###琼英###移动场上的一张牌`).set('logSkill', event.name).set('custom', {
-                        add: {},
-                        replace: {
-                            window: () => {
-                                if (get.event().name == 'chooseTarget') {
-                                    ui.click.cancel();
+                enable: 'phaseUse',
+                usable: 1,
+                chooseButton: {
+                    dialog(event, player) {
+                        const dialog = ui.create.dialog(
+                            '琼英：你可以选择一项',
+                            [
+                                [
+                                    ['move', '移动场上的一张牌'],
+                                    ['gain', '随机获得一张装备牌']
+                                ],
+                                'textbutton'
+                            ],
+                            'hidden'
+                        );
+                        dialog.direct = true;
+                        return dialog;
+                    },
+                    filter(button, player) {
+                        if (button.link === 'move' && !player.canMoveCard()) return false;
+                        return true;
+                    },
+                    check(button) {
+                        const player = get.player();
+                        const link = button.link;
+                        if (link === 'move') return player.canMoveCard(true);
+                        return 0.5;
+                    },
+                    backup(links) {
+                        const backup = {
+                            audio: 'miniqiongying',
+                            link: links[0],
+                            async content(event, trigger, player) {
+                                const { link } = get.info('miniqiongying_backup');
+                                const { target } = event;
+                                if (link === 'gain') {
+                                    const card = get.cardPile2(card => get.type(card) === 'equip', 'random');
+                                    if (card) await player.gain(card, 'gain2');
+                                } else {
+                                    const skill = 'miniqiongying';
+                                    event.pushHandler('onNextMoveCard', (event, option) => {
+                                        if (_status.connectMode && event.step == 1 && event._result.bool && option.state == 'end') {
+                                            game.broadcastAll(() => {
+                                                delete _status.noclearcountdown;
+                                                game.stopCountChoose();
+                                            });
+                                        }
+                                    });
+                                    const result = await player.moveCard(false, `###琼英###移动场上的一张牌`).set('logSkill', skill).set('custom', {
+                                        add: {},
+                                        replace: {
+                                            window: () => {
+                                                if (get.event().name == 'chooseTarget') {
+                                                    ui.click.cancel();
+                                                }
+                                            },
+                                        },
+                                    }).forResult();
+                                    if (!result?.bool && typeof player.getStat('skill')[skill] == 'number' && player.getStat('skill')[skill] > 0) {
+                                        player.getStat('skill')[skill]--;
+                                    }
                                 }
-                            },
-                        },
-                    }).forResult();
-                    if (!result?.bool && typeof player.getStat('skill')[event.name] == 'number' && player.getStat('skill')[event.name] > 0) {
-                        player.getStat('skill')[event.name]--;
+                            }
+                        };
+                        if (links[0] == 'move') backup.log = false;
+                        return backup;
+                    },
+                    prompt(links) {
+                        return `###琼英###你可以${links[0] == 'move' ? '移动场上的一张牌' : '随机获得一张装备牌'}`;
+                    },
+                },
+                ai: {
+                    order(item, player) {
+                        if (player.canMoveCard(true)) return 10
+                        return 7;
+                    },
+                    result: { player: 1 },
+                },
+                subSkill: { backup: {} }
+            },
+            mininuanhui: {
+                audio: 'dchuanhui',
+                trigger: { player: 'phaseJieshuBegin' },
+                async cost(event, trigger, player) {
+                    event.result = await player.chooseTarget(get.prompt2(event.skill)).set('ai', target => {
+                        return get.event().aiTarget === target ? 10 : 0;
+                    }).set('aiTarget', (() => {
+                        const player = get.player();
+                        const list = get.inpileVCardList(info => {
+                            return info[0] === 'basic';
+                        });
+                        if (!list.length) return null;
+                        const getUseValue = (target) => {
+                            if (get.attitude(player, target) <= 0) return -1;
+                            const toUse = [];
+                            const hp = target.hp;
+                            let eff = 0;
+                            let count = Math.max(1, target.countCards('e'));
+                            while (count--) {
+                                target.hp = Math.min(target.maxHp, target.hp + toUse.filter(card => card.name === 'tao').length);
+                                const listx = list.map((info) => {
+                                    const card = new lib.element.VCard({
+                                        name: info[2],
+                                        nature: info[3],
+                                        isCard: true
+                                    });
+                                    return [card, target.getUseValue(card)];
+                                }).sort((a, b) => {
+                                    return b[1] - a[1];
+                                });
+                                const mostValuablePair = listx[0].slice();
+                                if (mostValuablePair[1] <= 0) {
+                                    mostValuablePair[1] = 0;
+                                }
+                                eff += mostValuablePair[1];
+                                toUse.push(mostValuablePair[0]);
+                                target.hp = hp;
+                            }
+                            if (toUse.length > 1 && eff > 0) {
+                                eff -= target.getCards('e', (card) => {
+                                    return lib.filter.cardDiscardable(card, target, 'mininuanhui');
+                                }).map((card) => {
+                                    return get.value(card, target);
+                                }).reduce((p, c) => {
+                                    return p + c;
+                                }, 0);
+                            }
+                            return eff;
+                        };
+                        const playerList = game.filterPlayer().map(current => [current, getUseValue(current)]).sort((a, b) => b[1] - a[1]);
+                        if (playerList[0][1] <= 0) return null;
+                        return playerList[0][0];
+                    })()).forResult();
+                },
+                async content(event, trigger, player) {
+                    const target = event.targets[0];
+                    if (!target.isUnderControl(true) && !target.isOnline()) await game.delayx();
+                    const total = Math.max(1, target.countCards('e'));
+                    let count = 0;
+                    const used = new Map();
+                    let discard = false;
+                    while (count < total) {
+                        const basicList = get.inpileVCardList(info => {
+                            return info[0] === 'basic' && target.hasUseTarget({ name: info[2], nature: info[3], isCard: true });
+                        });
+                        if (!basicList.length) {
+                            game.log('但是', target, '无牌可出！');
+                            break;
+                        }
+                        const result = await target.chooseButton(['暖惠：是否视为使用一张基本牌？', [basicList, 'vcard']]).set('ai', button => {
+                            return get.player().getUseValue({
+                                name: button.link[2],
+                                nature: button.link[3],
+                                isCard: true,
+                            });
+                        }).forResult();
+                        if (!result?.bool) {
+                            game.log('但是', target, '不愿出牌！');
+                            break;
+                        }
+                        const card = new lib.element.VCard({
+                            name: result.links[0][2],
+                            nature: result.links[0][3],
+                            isCard: true,
+                        });
+                        const result2 = await target.chooseUseTarget(card, true, false).forResult();
+                        if (result2?.bool) {
+                            if (!used.has(result.links[0][2])) used.set(result.links[0][2], 0);
+                            else used.set(result.links[0][2], used.get(result.links[0][2]) + 1);
+                        }
+                        count++;
                     }
+                    let num = Array.from(used.values()).reduce((p, c) => p + c, 0);
+                    num = Math.min(num, target.countCards('e'));
+                    if (num) await target.chooseToDiscard('e', num, true, 'allowChooseAll');
+                },
+                ai: {
+                    expose: 0.3,
+                    threaten: 3.7,
                 },
             },
             //星荀彧
@@ -16441,11 +16597,11 @@ const packs = function () {
                     return game.hasPlayer(current => current != player && player.canUse({ name: 'sha', isCard: true }, current, false));
                 },
                 async cost(event, trigger, player) {
-                    event.result = await player.chooseTarget(get.prompt2(event.skill), (card, player2, target) => {
-                        return target != player2 && player2.canUse({ name: 'sha', isCard: true }, target, false);
+                    event.result = await player.chooseTarget(get.prompt2(event.skill), (card, player, target) => {
+                        return target != player && player.canUse({ name: 'sha', isCard: true }, target, false);
                     }).set('ai', target => {
-                        const player2 = get.player(), card = { name: 'sha', isCard: true };
-                        return get.effect(target, card, player2, player2);
+                        const player = get.player(), card = { name: 'sha', isCard: true };
+                        return get.effect(target, card, player, player);
                     }).set('_get_card', { name: 'sha', isCard: true }).forResult();
                 },
                 async content(event, trigger, player) {
@@ -48565,7 +48721,9 @@ const packs = function () {
             minipeiqi: '配器',
             minipeiqi_info: '当你受到伤害后，你可以移动场上至多两张牌。然后你摸一张牌。',
             miniqiongying: '琼英',
-            miniqiongying_info: '出牌阶段限一次。你可以移动场上的一张牌。',
+            miniqiongying_info: '出牌阶段限一次。你可以移动场上的一张牌或随机获得一张装备牌。',
+            mininuanhui: '暖惠',
+            mininuanhui_info: '结束阶段，你可以选择一名角色，其可以视为依次使用X张基本牌（X为其装备区牌数且至少为1）。其此次以此法每多使用一张同名牌，便弃置装备区里的一张牌。',
             minianshu: '安庶',
             minianshu_info: '①每轮开始时，你可以将弃牌堆中不同牌名的基本牌各一张置于牌堆顶（没有则跳过），视为使用一张由你指定起点结算的【五谷丰登】；②一名角色的回合结束时，若有角色本回合失去了本轮因〖安庶〗获得的牌，你可令其将手牌调整至体力上限（至多摸五张）。',
             minibeini: '悖逆',
