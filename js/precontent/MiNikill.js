@@ -32,7 +32,7 @@ const packs = function () {
                 MiNi_sbCharacter: [
                     ...['xiahoudun', 'zhangjiao', 'zhenji', 'ganning', 'huangyueying', 'sunshangxiang', 'xuhuang', 'zhaoyun', 'liubei', 'caocao', 'huanggai', 'yuanshao', 'yujin', 'machao', 'lvmeng', 'huangzhong'].map(i => `sb_${i}`),
                     ...['xizhicai', 'huaxiong', 'guanyu'].map(i => `ol_sb_${i}`),
-                    ...['dengai', 'liuxie', 'xunyu', 'lusu', 'chengyu'].map(i => `dc_sb_${i}`),
+                    ...['pangtong', 'dengai', 'liuxie', 'xunyu', 'lusu', 'chengyu'].map(i => `dc_sb_${i}`),
                     ...['guojia'].map(i => `yj_sb_${i}`),
                     ...[],
                 ].map(i => `Mbaby_${i}`),
@@ -266,6 +266,7 @@ const packs = function () {
             Mbaby_wuyi: ['male', 'shu', 4, ['minibenxi']],
             Mbaby_dc_huangwudie: ['female', 'shu', 4, ['minishuangrui', 'dcfuxie']],
             Mbaby_ol_jiangwan: ['male', 'shu', 3, ['olziruo', 'minixufa']],
+            Mbaby_dc_sb_pangtong: ['male', 'shu', 3, ['dcsbyinmou', 'minihongce']],
             //吴
             Mbaby_bulianshi: ['female', 'wu', 3, ['minianxu', 'zhuiyi']],
             Mbaby_chengpu: ['male', 'wu', 4, ['minilihuo', 'minichunlao']],
@@ -16790,6 +16791,202 @@ const packs = function () {
                 ai: {
                     order: 1,
                     result: { player: 1 },
+                },
+            },
+            // 谋庞统
+            minihongce: {
+                audio: 'dcsbhongce',
+                audioname: ['dc_sb_pangtong_shadow'],
+                trigger: { global: 'roundStart' },
+                enable: 'phaseUse',
+                filter(event, player) {
+                    if (event.name === 'phase') {
+                        const links = player.getRoundHistory('custom', evt => evt.skill === 'minihongce', 1).map(evt => evt.link);
+                        return ['sha', 'recast', 'draw'].some(link => {
+                            if (links.includes(link)) return false;
+                            return link === 'draw' || game.hasPlayer(current => current.hasCards('h'));
+                        });
+                    }
+                    return !player.hasSkill('minihongce_used') && player.storage.minihongce_mark;
+                },
+                filterTarget(card, player, target) {
+                    const link = player.storage.minihongce_mark;
+                    return link === 'draw' || target.hasCards('h');
+                },
+                async cost(event, trigger, player) {
+                    const result = await player.chooseTarget('宏策：令一名角色选择一项执行', get.skillInfoTranslation(event.skill), true).set('ai', target => {
+                        const player = get.player();
+                        return get.attitude(player, target);
+                    }).forResult();
+                    if (result?.bool && result.targets?.length) {
+                        event.result = {
+                            bool: true,
+                            targets: result.targets,
+                        };
+                    }
+                },
+                prompt(event, player) {
+                    if (event.name === 'phase') return get.prompt('minihongce', null, player);
+                    const link = player.storage.minihongce_mark;
+                    switch (link) {
+                        case 'sha': return '令一名角色弃置半数手牌（向上取整）并获得等量张伤害牌，视为使用一张【杀】';
+                        case 'recast': return '令一名角色重铸一张手牌，视为使用一张单目标普通锦囊牌';
+                        default: return '令一名角色摸三张牌，这些牌不计入手牌上限';
+                    }
+                },
+                logAudio(event, player) {
+                    if (event.name === 'phase') return 2;
+                    else {
+                        if (player.storage.minihongce_mark) {
+                            const link = player.storage.minihongce_mark;
+                            switch (link) {
+                                case 'sha':
+                                    return player.storage.dcsbyinmou ? 'dcsbhongce_dc_sb_pangtong_shadow3.mp3' : 'dcsbhongce3.mp3';
+                                case 'recast':
+                                    return player.storage.dcsbyinmou ? 'dcsbhongce_dc_sb_pangtong_shadow4.mp3' : 'dcsbhongce4.mp3';
+                                default:
+                                    return player.storage.dcsbyinmou ? 'dcsbhongce_dc_sb_pangtong_shadow5.mp3' : 'dcsbhongce5.mp3';
+                            }
+                        }
+                    }
+                },
+                async content(event, trigger, player) {
+                    const { targets: [target] } = event;
+                    let link;
+                    if (trigger?.name === 'phase') {
+                        const links = player.getRoundHistory('custom', evt => evt.skill === event.name, 1).map(evt => evt.link);
+                        const result = await target.chooseButton(
+                            [
+                                `宏策：选择一项执行`,
+                                [
+                                    [
+                                        ['sha', '弃置半数手牌（向上取整）并获得等量张伤害牌，视为使用一张【杀】'],
+                                        ['recast', '重铸一张手牌，视为使用一张单目标普通锦囊牌'],
+                                        ['draw', '摸三张牌，这些牌不计入手牌上限'],
+                                    ],
+                                    'textbutton',
+                                ],
+                            ],
+                            true
+                        ).set('filterButton', button => {
+                            const { player, links } = get.event();
+                            if (links.includes(button.link)) return false;
+                            return button.link === 'draw' || player.hasCards('h');
+                        }).set('links', links).set('ai', () => Math.random()).forResult();
+                        if (result?.bool && result.links?.length) {
+                            link = result.links[0];
+                            player.getHistory('custom').push({ skill: event.name, link: link });
+                            player.addTempSkill('minihongce_mark', 'roundEnd');
+                            player.setStorage('minihongce_mark', link, true);
+                        }
+                    } else {
+                        player.addTempSkill('minihongce_used', { global: 'phaseAnyAfter' });
+                        link = player.storage.minihongce_mark;
+                    }
+                    if (!link) return;
+                    switch (link) {
+                        case 'sha': {
+                            const num = Math.ceil(target.countCards('h') / 2);
+                            if (num > 0) {
+                                const result = await target.chooseToDiscard('宏策：弃置半数手牌（向上取整）并获得等量张伤害牌', num, true, 'allowChooseAll').set('ai', card => {
+                                    return 7 - get.value(card);
+                                }).forResult();
+                                if (result?.bool && result.cards?.length) {
+                                    const cards = [];
+                                    while (cards.length < result.cards.length) {
+                                        const card = get.cardPile2(card => get.is.damageCard(card) && !cards.includes(card), 'random');
+                                        if (card) cards.add(card);
+                                        else break;
+                                    }
+                                    if (cards.length) await target.gain(cards, 'gain2').set('log', false);
+                                }
+                            }
+                            const card = new lib.element.VCard({ name: "sha", isCard: true });
+                            if (target.hasUseTarget(card)) await target.chooseUseTarget(card, false, true);
+                            break;
+                        }
+                        case 'recast': {
+                            if (target.hasCards('h', lib.filter.cardRecastable)) {
+                                const result = await target.chooseCard('h', true, '宏策：请重铸一张手牌', lib.filter.cardRecastable).set('ai', card => {
+                                    return 8 - get.value(card);
+                                }).forResult();
+                                if (result?.bool && result.cards?.length) await target.recast(result.cards);
+                            }
+                            const list = get.inpileVCardList(info => {
+                                if (info[0] !== 'trick') return false;
+                                const infox = lib.card[info[2]];
+                                if (infox.notarget) return false;
+                                const check = () => {
+                                    const select = infox.selectTarget;
+                                    if (select !== undefined) {
+                                        if (Array.isArray(select)) {
+                                            if (select[0] < 0) return infox.toself;
+                                            return select[0] === 1 && select[1] === 1;
+                                        }
+                                        if (select < 0) return infox.toself;
+                                        return select === 1;
+                                    }
+                                    return true;
+                                };
+                                if (!check()) return false;
+                                const card = new lib.element.VCard({ name: info[2], isCard: true });
+                                return target.hasUseTarget(card);
+                            });
+                            if (!list.length) return;
+                            const result = await target.chooseButton(['宏策：视为使用一张单目标普通锦囊牌', [list, 'vcard']], true).set('ai', button => {
+                                const card = new lib.element.VCard({ name: button.link[2], isCard: true });
+                                return get.player().getUseValue(card);
+                            }).set('direct', true).forResult();
+                            if (result?.bool && result.links?.length) {
+                                const card = new lib.element.VCard({ name: result.links[0][2], isCard: true });
+                                if (target.hasUseTarget(card)) await target.chooseUseTarget(card, true, false);
+                            }
+                            break;
+                        }
+                        default: {
+                            target.addSkill('minihongce_limit');
+                            const next = target.draw(3);
+                            next.gaintag.add('minihongce');
+                            await next;
+                            break;
+                        }
+                    }
+                },
+                ai: {
+                    order: 7,
+                    result: { target: 2 },
+                },
+                subSkill: {
+                    used: { charlotte: true },
+                    limit: {
+                        charlotte: true,
+                        onremove(player, skill) {
+                            player.removeGaintag('minihongce');
+                        },
+                        mod: {
+                            ignoredHandcard(card, player) {
+                                if (card.hasGaintag('minihongce')) return true;
+                            },
+                            cardDiscardable(card, player, name) {
+                                if (name === 'phaseDiscard' && card.hasGaintag('minihongce')) return false;
+                            },
+                        },
+                    },
+                    mark: {
+                        charlotte: true,
+                        onremove: true,
+                        mark: true,
+                        intro: {
+                            content(storage, player) {
+                                let str = '本轮出牌阶段限一次，你可以';
+                                switch (storage) {
+                                    case 'sha': return str + '令一名角色弃置半数手牌（向上取整）并获得等量张伤害牌，视为使用一张【杀】';
+                                    case 'recast': return str + '令一名角色重铸一张手牌，视为使用一张单目标普通锦囊牌';
+                                    default: return str + '令一名角色摸三张牌，这些牌不计入手牌上限';
+                                }
+                            }
+                        },
+                    }
                 },
             },
             //吴
@@ -48822,6 +49019,7 @@ const packs = function () {
             Mbaby_wuyi: '欢杀吴懿',
             Mbaby_dc_huangwudie: '欢杀黄舞蝶',
             Mbaby_ol_jiangwan: '欢杀蒋琬',
+            Mbaby_dc_sb_pangtong: '欢杀谋庞统',
             miniwusheng: '武圣',
             miniwusheng_info: '锁定技。①你使用红色【杀】造成的伤害+1。②回合开始时，你从牌堆或弃牌堆中获得一张红色【杀】。',
             miniguanxing: '观星',
@@ -49146,6 +49344,8 @@ const packs = function () {
             minishuangrui_info: `准备阶段，你可以选择一名其他角色，视为对其使用一张【杀】。若其：①不在你的攻击范围内，此【杀】不可被响应，你获得${get.poptip('dcshouxing')}；②在你的攻击范围内，此【杀】伤害+1，你获得${get.poptip('dcshaxue')}。`,
             minixufa: '蓄发',
             minixufa_info: '出牌阶段各限一次，你可以：①将至少一张手牌称为“蓄发”置于武将牌上，然后你可以将一张牌当作“蓄发”牌中的一张普通锦囊牌使用（你至多拥有二十张“蓄发”）；②移去至少一张“蓄发”牌，然后你可以将一张牌当作其中一张普通锦囊牌使用。',
+            minihongce: '宏策',
+            minihongce_info: '①每轮开始时，你令一名角色选择上一轮未选择的一项执行：1.弃置半数手牌（向上取整）并获得等量张伤害牌，视为使用一张【杀】；2.重铸一张手牌，视为使用一张单目标普通锦囊牌；3.摸三张牌且这些牌不计入手牌上限。②出牌阶段限一次，你可令一名角色执行你本轮〖宏策①〗选择的项。',
             //吴
             Mbaby_bulianshi: '欢杀步练师',
             Mbaby_chengpu: '欢杀程普',
