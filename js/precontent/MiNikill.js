@@ -32065,80 +32065,62 @@ const packs = function () {
             //SP徐晃
             minikuanmeng: {
                 audio: 'ext:活动武将/audio/skill:2',
-                trigger: { player: ['damageEnd', 'recoverEnd', 'loseHpEnd'] },
+                trigger: { player: 'changeHpAfter' },
                 filter(event, player) {
-                    if (game.getGlobalHistory('changeHp', evt => evt.player == player).map(evt => evt.getParent()).indexOf(event) !== 0) return false;
+                    if (event.changedHp == 0) return false;
                     return !player.isDying();
                 },
-                async cost(event, trigger, player) {
-                    const list = ['摸一张牌', '弃置一张牌', '摸两张牌', '弃置两张牌'].map((item, i) => [i, item]);
-                    const next = player.chooseButton(['宽猛：请选择你要执行的选项', [list.slice(0, 2), 'tdnodes'], [list.slice(2, 4), 'tdnodes']]);
-                    next.set('filterButton', button => {
-                        const player = get.player();
-                        const { link } = button;
-                        if (link % 2 === 0) return true;
-                        return player.countDiscardableCards(player, 'he') >= (link + 1) / 2;
-                    });
-                    next.set('ai', button => {
-                        const player = get.player();
-                        const { link } = button;
-                        const num1 = player.getCards('h').filter(card => get.type(card) == 'basic').length;
-                        const num2 = player.hp;
-                        if (num1 > num2) {
-                            const num = num1 - num2;
-                            if (game.hasPlayer(current => player != current && get.attitude(player, current) < 0 && get.effect(current, { name: 'guohe_copy2' }, player, player) > 0) && player.countCards('h') > 2) {
-                                if (link % 2 === 0) return 0;
-                                if (link === (num % 2 + 1)) return 100;
-                            }
-                            if (link === 2) return 100;
-                        }
-                        else if (num1 < num2) {
-                            const num = num2 - num1;
-                            if (game.hasPlayer(current => player != current && get.attitude(player, current) > 0)) {
-                                if (link % 2 === 1) return 0;
-                                if (link === (num % 2 + 1)) return 100;
-                            }
-                        }
-                        if (link === 2) return 100;
-                        return 0;
-                    });
-                    const result = await next.forResult();
-                    event.result = {
-                        bool: result?.bool,
-                        cost_data: result?.links,
-                    }
-                },
                 async content(event, trigger, player) {
-                    const { cost_data: [link] } = event;
-                    const num = link <= 1 ? 1 : 2;
-                    const fn = ['draw', 'chooseToDiscard'];
-                    if (link % 2 === 1) fn.reverse();
-                    const next = player[fn[0]](num, true, 'he');
-                    if (fn[0] == 'chooseToDiscard') next.set('ai', card => {
+                    await player.draw(2);
+                    await player.chooseToDiscard('h', [1, Infinity], 'allowChooseAll').set('ai', card => {
                         const player = get.player();
-                        const num1 = player.getCards('h').filter(card => get.type(card) == 'basic').length;
-                        const num2 = player.hp;
-                        const num = num1 - num2;
-                        if (num > 0 && num <= 2 && get.type(card) == 'basic' && !card.hasGaintag('minixuefeng_effect')) return 100;
+                        if (game.hasPlayer(current => player != current)) return 0;
+                        if (ui.selected.cards.length) return 0;
                         return 6 - get.value(card);
                     });
-                    await next;
-                    const hs = player.getCards('h');
-                    if (hs.filter(card => get.type(card) == 'basic').length != player.hp || !game.hasPlayer(current => player != current)) return;
-                    const result = await player.chooseTarget('宽猛：选择一名角色', `令其${fn[0] == 'draw' ? '摸' : '弃置'}${get.cnNumber(num)}张牌`, (card, player, target) => {
-                        if (player == target) return false;
-                        const { choice } = get.event();
-                        return choice == 'draw' || target.countDiscardableCards(target, 'he');
-                    }, true).set('ai', target => {
-                        const player = get.player();
-                        const { choice } = get.event();
-                        if (choice == 'draw') return get.effect(target, { name: 'draw' }, player, player);
-                        return get.effect(target, { name: 'guohe_copy2' }, player, player);
-                    }).set('choice', fn[0]).forResult();
+                    if (!game.hasPlayer(current => player != current)) return;
+                    const num = game.countPlayer(current => current.countCards('h') == player.countCards('h'));
+                    const result = await player.chooseButtonTarget({
+                        createDialog: [
+                            `宽猛：你可以`,
+                            [
+                                [
+                                    ['draw', `令一名其他角色摸${get.cnNumber(num)}张牌`],
+                                    ['discard', `令一名其他角色弃置${get.cnNumber(num)}张牌`]
+                                ],
+                                'tdnodes'
+                            ]
+                        ],
+                        filterButton(button) {
+                            const player = get.player();
+                            if (button.link == 'discard') return game.hasPlayer(target => target != player && target.hasCards('he'));
+                            return true;
+                        },
+                        filterTarget(card, player, target) {
+                            if (player == target) return false;
+                            return ui.selected.buttons[0].link !== 'discard' || target.hasCards('he');
+                        },
+                        ai1(button) {
+                            const player = get.player();
+                            const link = button.link;
+                            const list1 = game.filterPlayer(current => current != player && get.attitude(player, current) > 0).map(current => get.effect(current, { name: 'draw' }, player, player)).sort((a, b) => b - a);
+                            const list2 = game.filterPlayer(current => current != player && get.attitude(player, current) < 0).map(current => get.effect(current, { name: 'guohe_copy2' }, player, player)).sort((a, b) => b - a);
+                            if (list1[0] > list2[0] && list1[0] > 0 && link == 'draw') return 2;
+                            if (list2[0] > list1[0] && list2[0] > 0 && link == 'discard') return 2;
+                            return 0;
+                        },
+                        ai2(target) {
+                            const player = get.player();
+                            const { link } = ui.selected.buttons[0];
+                            if (link == 'draw') return get.effect(target, { name: 'draw' }, player, player);
+                            return get.effect(target, { name: 'guohe_copy2' }, player, player);
+                        },
+                    }).forResult();
                     if (result?.bool && result?.targets?.length) {
                         const [target] = result.targets;
                         player.line(target, 'green');
-                        await target[fn[0]](num, true, 'he');
+                        if (result.links[0] == 'draw') await target.draw(num);
+                        else await target.chooseToDiscard(num, true, 'he', 'allowChooseAll');
                     }
                 },
             },
@@ -32147,36 +32129,19 @@ const packs = function () {
                 enable: 'phaseUse',
                 usable: 1,
                 filter(event, player) {
-                    if (!player.countCards('h', { type: 'basic' })) return false;
                     return game.hasPlayer(target => get.info('minixuefeng').filterTarget(null, player, target));
                 },
-                filterCard(card, player) {
-                    return get.type(card) == 'basic';
-                },
-                filterTarget(card, player, target) {
-                    if (!ui.selected.targets.length) return player !== target;
-                    return true;
-                },
-                selectTarget: 2,
-                targetprompt: ['奉献者', '被奉献者'],
-                complexTarget: true,
-                discard: false,
-                lose: false,
-                delay: false,
-                multitarget: true,
-                check(card) {
-                    return 7 - get.value(card);
-                },
+                filterTarget: lib.filter.notMe,
                 async content(event, trigger, player) {
                     await player.showCards(event.cards);
-                    const { targets: [source, target] } = event;
+                    const { target } = event;
                     await game.delayx();
                     const effect = event.name + '_effect';
-                    target.addSkill(effect);
+                    player.addSkill(effect);
                     let result;
-                    if (!source.countCards('h', { type: 'basic' })) result = { bool: false };
+                    if (!target.hasCards('h', card => get.type(card) == 'basic')) result = { bool: false };
                     else {
-                        const next = source.chooseToGive(target, 'h', { type: 'basic' }, `交给${get.translation(target)}一张基本牌，否则你失去1点体力其回复1点体力`);
+                        const next = target.chooseToGive(player, 'h', card => get.type(card) == 'basic', `交给${get.translation(player)}一张基本牌，否则你失去1点体力且其回复1点体力`);
                         next.gaintag.add(effect);
                         next.set('ai', card => {
                             const { player, target } = get.event();
@@ -32191,53 +32156,24 @@ const packs = function () {
                     }
                     if (result?.bool) {
                         await player.loseHp();
-                        await target.recover();
+                        await player.recover();
                     }
                     else {
-                        await source.loseHp();
-                        await target.recover();
-                        if (!player.countCards('h', { type: 'basic' })) return;
-                        if (player == target) {
-                            const result = await player.chooseCard('h', { type: 'basic' }, true, `请选择一张基本牌，此牌的伤害值/回复值+1`).set('ai', card => {
-                                if (get.tag(card, 'damage') || get.tag(card, 'recover')) return 10;
-                                return 6 - get.value(card);
-                            }).forResult();
-                            if (result?.bool && result?.cards?.length) player.addGaintag(result.cards, effect);
-                        }
-                        else {
-                            const next = player.chooseToGive(target, 'h', { type: 'basic' }, true, `请交给${get.translation(target)}一张基本牌`);
-                            next.gaintag.add(effect);
-                            next.set('ai', card => {
-                                const { player, target } = get.event();
-                                const att = get.attitude(player, target);
-                                if (att > 0 && (get.tag(card, 'damage') || get.tag(card, 'recover'))) return 7.5 - get.value(card);
-                                return 6 - get.value(card);
-                            });
-                            await next;
-                        }
+                        await target.loseHp();
+                        await player.recover();
+                        if (!player.hasCards('h', card => get.type(card) == 'basic')) return;
+                        const result = await player.chooseCard('h', card => get.type(card) == 'basic', true, `请选择一张基本牌，此牌的伤害值/回复值+1`).set('ai', card => {
+                            if (get.tag(card, 'damage') || get.tag(card, 'recover')) return 10;
+                            return 6 - get.value(card);
+                        }).forResult();
+                        if (result?.bool && result?.cards?.length) player.addGaintag(result.cards, effect);
                     }
                 },
                 ai: {
-                    order(item, player) {
-                        const friends = game.filterPlayer(current => get.attitude(player, current) > 0);
-                        const enemies = game.filterPlayer(current => current != player && get.attitude(player, current) < 0);
-                        if (friends.some(current => get.recoverEffect(current, player, player) > 0) && enemies.some(current => !current.countCards('h') || !current.countCards('h', { type: 'basic' }))) return 10;
-                        if (player.getHp() > 1 || game.hasPlayer(current => get.attitude(current, player) > 0 && current.canSave(player))) return 8;
-                        return 3;
-                    },
+                    order: 10,
                     result: {
-                        target(player, target) {
-                            if (!ui.selected.targets.length) {
-                                const att = get.attitude(player, target);
-                                if (att > 0) return 0;
-                                const friends = game.filterPlayer(current => get.attitude(player, current) > 0);
-                                if (friends.some(current => get.recoverEffect(current, player, player) > 0) && (!target.countCards('h') || !target.countCards('h', { type: 'basic' }))) return -4;
-                                return -3;
-                            }
-                            const source = ui.selected.targets[0];
-                            if (player.getHp() < 1 && !game.hasPlayer(current => get.attitude(current, player) > 0 && current.canSave(player))) return 0;
-                            return 1 + target.getDamagedHp() + (target.countCards('h') < 3);
-                        }
+                        player: 1,
+                        target: -1,
                     }
                 },
                 subSkill: {
@@ -50139,9 +50075,9 @@ const packs = function () {
             minilangmie: '狼灭',
             minilangmie_info: '其他角色结束阶段。若其本回合使用过的牌中有类型相同的牌，则你可以弃置一张牌并摸两张牌；若其本回合内造成的伤害大于1，则你可以弃置一张牌并对其造成1点伤害。',
             minikuanmeng: '宽猛',
-            minikuanmeng_info: '当你的体力值每回合首次变化后，若你不处于濒死状态，你可以摸/弃置至多两张牌并展示所有手牌，若其中的基本牌数与你体力值相同，你令另一名其他角色执行等量效果。',
+            minikuanmeng_info: '每回合限一次，当你的体力值变化后，若你不处于濒死状态，你可以摸两张牌并弃置任意张手牌，然后你可以令一名其他角色摸X张牌或者弃置X张牌（X为与你手牌数相同的角色数）。',
             minixuefeng: '血奉',
-            minixuefeng_info: '出牌阶段限一次。你可以展示一张基本牌并令一名其他角色A对你选择的一名不为A的角色的B执行一项：1.交给B一张基本牌且此牌伤害值/回复值+1；2.失去1点体力并令B回复1点体力。然后你执行另一项。',
+            minixuefeng_info: '出牌阶段限一次。你可以令一名其他角色选择一项：1.交给你一张基本牌且此牌伤害值/回复值+1；2.失去1点体力，你回复1点体力。然后你执行另一项。',
             minitaoluan: '滔乱',
             minitaoluan_info: '每回合每种花色限一次，你可将一张牌当做任意一张你未以此法使用过的基本牌或普通锦囊牌使用，然后你令一名其他角色选择一项：1.交给你一张与本次〖滔乱〗声明的牌类别不同的牌；2.本回合〖滔乱〗失效，若你为当前回合角色，则回合结束时其失去1点体力。',
             minizhuyi: '逐义',
