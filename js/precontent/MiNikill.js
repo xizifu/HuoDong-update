@@ -36807,9 +36807,9 @@ const packs = function () {
                 filter(event, player) {
                     if (event.source !== player) return false;
                     const evt = event.getParent(2);
-                    if (!(event.getParent().type === 'card' && evt.name === 'useCard' && evt.player === player && get.color(evt.card) === 'red')) return false;
+                    if (!(event.getParent().type === 'card' && evt.name === 'useCard' && evt.player === player)) return false;
                     if (typeof player.hp2 === 'number' && player.getHp() === Math.max(0, player.hp2) && player.isDamaged()) return true;
-                    return player.countCards('h', { suit: 'heart' }) === player.countCards('h', { suit: 'diamond' }) && player.hasCard(card => {
+                    return player.countCards('h', card => get.color(card) == 'red') * 2 > player.countCards('h') && player.hasCard(card => {
                         if (_status.connectMode && get.color(card) === 'h') return true;
                         return get.color(card) === 'red' && lib.filter.cardDiscardable(card, player);
                     }, 'he');
@@ -36817,13 +36817,14 @@ const packs = function () {
                 direct: true,
                 async content(event, trigger, player) {
                     if (typeof player.hp2 === 'number' && player.getHp() === Math.max(0, player.hp2) && player.isDamaged()) {
-                        const result = await player.chooseBool(`${get.translation(event.name)}：是否回复1点体力？`).set('choice', get.recoverEffect(player, player, player) > 0).forResult();
+                        const result = await player.chooseBool(`${get.translation(event.name)}：是否摸一张牌并回复1点体力？`).set('choice', get.effect(player, { name: 'draw' }, player, player) + get.recoverEffect(player, player, player) > 0).forResult();
                         if (result?.bool) {
                             player.logSkill(event.name);
+                            await player.draw();
                             await player.recover();
                         }
                     }
-                    if (player.countCards('h', { suit: 'heart' }) === player.countCards('h', { suit: 'diamond' }) && player.hasCard(card => {
+                    if (player.countCards('h', card => get.color(card) == 'red') * 2 > player.countCards('h') && player.hasCard(card => {
                         if (_status.connectMode && get.color(card) === 'h') return true;
                         return get.color(card) === 'red' && lib.filter.cardDiscardable(card, player);
                     }, 'he')) {
@@ -50311,7 +50312,7 @@ const packs = function () {
             minishutu: '殊途',
             minishutu_info: '①大乔回复体力后，你可以从牌堆或弃牌堆获得两张指定花色的红色牌。②小乔受到伤害后，你可以使用一张牌（无次数限制且不可被响应）。',
             minitongdi: '同蒂',
-            minitongdi_info: '当你使用红色牌令一名角色的体力值变化后，你依次执行：①若大乔和小乔的体力值相同，则你可以回复1点体力；②若你手牌中的红桃牌和方片牌的数量相同，则你可以弃置一张红色牌，对一名角色造成1点伤害。',
+            minitongdi_info: '当你使用牌令一名角色的体力值变化后，你依次执行：①若大乔和小乔的体力值相同，则你可以摸一张牌并回复1点体力；②若你手牌中的红色牌较多，则你可以弃置一张红色牌，对一名角色造成1点伤害。',
             minishuangshu2: '双姝',
             minishuangshu2_info: '转换技。①游戏开始时，你可以转换此技能状态；②阳：当你使用或打出一张方片牌后，你摸X张牌（X为你装备区的红色牌数）；阴：当你使用或打出一张红桃牌后，你可以弃置一张牌，然后从牌堆或弃牌堆获得两张与此牌花色不同的牌。',
             miniyizheng2: '移筝',
