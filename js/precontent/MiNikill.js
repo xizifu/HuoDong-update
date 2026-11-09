@@ -40,7 +40,7 @@ const packs = function () {
                     ...['zhangzhao', 'sunjian', 'dongzhuo', 'dingfeng', 'simayi', 'zhangchunhua', 'yuanshao', 'sunshangxiang', 'xunyu', 'yuanshu'].map(i => `star_${i}`),
                     ...['ganning'].map(i => `yj_${i}`),
                 ].map(i => `Mbaby_${i}`),
-                MiNi_yueCharacter: ['xiaoqiao', 'caiwenji', 'zhoufei', 'diaochan', 'daqiao'].map(i => `Mbaby_yue_${i}`),
+                MiNi_yueCharacter: ['zhouyu', 'xiaoqiao', 'caiwenji', 'zhoufei', 'diaochan', 'daqiao'].map(i => `Mbaby_yue_${i}`),
                 MiNi_miaoKill: ['bulianshi', 'mayunlu', 'guanyinping', 'caoying', 'caiwenji', 'diaochan', 'caifuren', 'zhangxingcai', 'zhurong', 'huangyueying', 'daqiao', 'wangyi', 'zhangchunhua', 'zhenji', 'sunshangxiang', 'xiaoqiao', 'lvlingqi'].map(i => `Mmiao_${i}`),
                 MiNi_nianKill: ['sunquan', 'caopi', 'zhugeliang', 'lvbu', 'zhouyu'].map(i => `Mnian_${i}`),
                 MiNi_fightKill: ['huangzhong', 'zhangliao', 'luxun', 'dianwei', 'machao', 'jiangwei', 'lvmeng', 'yuanshao', 'zhaoyun'].map(i => `Mfight_${i}`),
@@ -363,6 +363,7 @@ const packs = function () {
             Mbaby_star_dingfeng: ['male', 'wu', 4, ['stardangchen', 'minijianyu']],
             Mbaby_star_zhangzhao: ['male', 'wu', 3, ['starzhongyan', 'minijinglun']],
             Mbaby_yue_xiaoqiao: ['female', 'wu', 3, ['miniqiqin', 'dcweiwan'], ['name:桥|null']],
+            Mbaby_yue_zhouyu: ['male', 'wu', 3, ['miniguyin', 'dcpinglu']],
             //群
             Mbaby_gaoshun: ['male', 'qun', 4, ['minixianzhen', 'minijinjiu']],
             Mbaby_xin_gaoshun: ['male', 'qun', 4, ['minirexianzhen', 'minirejinjiu'], ['character:Mbaby_gaoshun']],
@@ -24106,6 +24107,29 @@ const packs = function () {
                     if (index == 1) {
                         await target.chooseToDiscard(num, 'he', 'allowChooseAll', true);
                     }
+                },
+            },
+            // 乐周瑜
+            miniguyin: {
+                audio: 'dcguyin',
+                trigger: { global: ['loseAfter', 'equipAfter', 'addJudgeAfter', 'gainAfter', 'loseAsyncAfter', 'addToExpansionAfter', 'gameDrawBegin'] },
+                filter(event, player) {
+                    if (event.name == 'gameDraw') return true;
+                    return game.hasPlayer(current => {
+                        if (player == current) return false;
+                        const cards = event.getl(current)?.cards2 || [];
+                        return cards.containsSome(...(current._start_cards || []));
+                    });
+                },
+                forced: true,
+                async content(event, trigger, player) {
+                    if (trigger.name == 'gameDraw') {
+                        const me = player;
+                        const numx = trigger.num;
+                        trigger.num = function (player) {
+                            return player == me ? 0 : 1 + (typeof numx == 'function' ? numx(player) : numx);
+                        };
+                    } else await player.draw();
                 },
             },
             //群
@@ -49453,6 +49477,7 @@ const packs = function () {
             Mbaby_star_sunjian: '欢杀星孙坚',
             Mbaby_star_zhangzhao: '欢杀星张昭',
             Mbaby_yue_xiaoqiao: '欢杀乐小乔',
+            Mbaby_yue_zhouyu: '欢杀乐周瑜',
             minizhiheng: '制衡',
             minizhiheng_info: '出牌阶段限一次，你可以弃置任意张牌并摸等量张牌。若你以此法弃置了全部手牌，则你额外摸一张牌。若本阶段你第一次发动〖制衡〗获得的牌未包含延时锦囊牌，则本阶段你可以额外发动一次〖制衡〗。若本阶段你第二次发动〖制衡〗获得的牌均为基本牌，则本阶段你可以额外发动一次〖制衡〗。',
             minijiuyuan: '救援',
@@ -49777,6 +49802,8 @@ const packs = function () {
             minigangyi_info: '锁定技。①回合结束时，若你本回合没有造成伤害，你下回合使用【杀】的次数上限+1。②②当你处于濒死状态时，以你为目标的【桃】或【酒】的回复值+1。',
             minijinglun: '经纶',
             minijinglun_info: `每回合限一次，当你距离1以内的一名角色造成伤害后，你可以选择一项：①令其摸X张牌，然后对其发动${get.poptip('starzhongyan')}；②对其发动${get.poptip('starzhongyan')}，然后令其弃置X张牌（不足则全弃）。X为你发动此技能时其装备区里的牌数。`,
+            miniguyin: '顾音',
+            miniguyin_info: '锁定技。①你的初始手牌数为0，其他角色的初始手牌数+1。②其他角色失去初始手牌后，你摸一张牌。',
             //群
             Mbaby_zuoci: '欢杀左慈',
             Mbaby_gaoshun: '欢杀高顺',

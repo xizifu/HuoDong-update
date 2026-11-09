@@ -5597,6 +5597,10 @@
             "size": 130606
         },
         {
+            "path": "image/character/Mbaby_dc_sb_pangtong.jpg",
+            "size": 139885
+        },
+        {
             "path": "image/character/Mbaby_dc_sb_xunyu.jpg",
             "size": 112047
         },
@@ -7011,6 +7015,10 @@
         {
             "path": "image/character/Mbaby_yue_zhoufei.jpg",
             "size": 158835
+        },
+        {
+            "path": "image/character/Mbaby_yue_zhouyu.jpg",
+            "size": 142790
         },
         {
             "path": "image/character/Mbaby_yuejin.jpg",
@@ -9422,7 +9430,7 @@
         },
         {
             "path": "js/precontent/MiNikill.js",
-            "size": 3107754
+            "size": 3109282
         },
         {
             "path": "js/precontent/MiNikill_sight.js",
@@ -9458,7 +9466,7 @@
         },
         {
             "path": "js/precontent/index.js",
-            "size": 43381
+            "size": 43401
         },
         {
             "path": "js/precontent/模板.js",
