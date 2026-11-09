@@ -43,7 +43,7 @@ const packs = function () {
                 MiNi_yueCharacter: ['xiaoqiao', 'caiwenji', 'zhoufei', 'diaochan', 'daqiao'].map(i => `Mbaby_yue_${i}`),
                 MiNi_miaoKill: ['bulianshi', 'mayunlu', 'guanyinping', 'caoying', 'caiwenji', 'diaochan', 'caifuren', 'zhangxingcai', 'zhurong', 'huangyueying', 'daqiao', 'wangyi', 'zhangchunhua', 'zhenji', 'sunshangxiang', 'xiaoqiao', 'lvlingqi'].map(i => `Mmiao_${i}`),
                 MiNi_nianKill: ['sunquan', 'caopi', 'zhugeliang', 'lvbu', 'zhouyu'].map(i => `Mnian_${i}`),
-                MiNi_fightKill: ['huangzhong', 'zhangliao', 'luxun', 'dianwei', 'machao', 'jiangwei', 'lvmeng', 'yuanshao'].map(i => `Mfight_${i}`),
+                MiNi_fightKill: ['huangzhong', 'zhangliao', 'luxun', 'dianwei', 'machao', 'jiangwei', 'lvmeng', 'yuanshao', 'zhaoyun'].map(i => `Mfight_${i}`),
                 MiNi_yinKill: ['jiaxu', 'yuji', 'xushu'].map(i => `Myin_${i}`),
                 MiNi_fireKill: ['zhurong'].map(i => `Mfire_${i}`),
                 MiNi_qingKill: ['lvdiao', 'lvbu', 'diaochan'].map(i => `Mqing_${i}`),
@@ -578,6 +578,7 @@ const packs = function () {
             Mfight_jiangwei: ['male', 'shu', 4, ['minifightyilve', 'minifightqizhi']],
             Mfight_lvmeng: ['male', 'wu', 4, ['minifightandu', 'minifightmingtan']],
             Mfight_yuanshao: ['male', 'qun', 4, ['minifightpozhan', 'minifighthedou']],
+            Mfight_zhaoyun: ['male', 'shu', 4, ['minifightlongzhan', 'minifightlixue']],
             //隐
             Myin_xushu: ['male', 'wei', 3, ['miniyinyinxing', 'miniyinjujian']],
             Myin_yuji: ['male', 'qun', 0, ['miniyinyinming', 'miniyinhuozhong']],
@@ -45716,6 +45717,13 @@ const packs = function () {
                     }
                 }
             },
+            //战赵云
+            minifightlongzhan: {
+                audio: 'ext:活动武将/audio/skill:2',
+            },
+            minifightlixue: {
+                audio: 'ext:活动武将/audio/skill:2',
+            },
             //隐系列
             //徐庶
             miniyinyinxing: {
@@ -50767,6 +50775,7 @@ const packs = function () {
             Mfight_jiangwei: '战姜维',
             Mfight_lvmeng: '战吕蒙',
             Mfight_yuanshao: '战袁绍',
+            Mfight_zhaoyun: '战赵云',
             minifightdingjun: '定军',
             minifightdingjun_info: `战场技。①任意角色使用【杀】每造成1点伤害，士气+1。②士气每增加1点，你摸一张牌。③士气达到X层时，进入“定军山战场”（X为本局游戏人数）。④“定军山战场”下，任意角色使用【杀】时，你可以消耗2层士气，令其于此牌结算中视为拥有${get.poptip('minifightreliegong')}。⑤一名角色的回合结束时，若士气为0，则退出“定军山战场”。`,
             minifightliegong: '烈弓',
@@ -50811,6 +50820,10 @@ const packs = function () {
             minifighthedou_info: '每回合每项各限一次。一名角色使用多目标锦囊牌指定目标后，你可以选择一项：1.令此牌对其中一个目标生效两次且对其余目标无效；2.令此牌对其中一个目标无效且此牌进入弃牌堆后你获得之。',
             minifightluanji: '乱击',
             minifightluanji_info: `你将手牌摸至X张，然后使用X张手牌当【万箭齐发】使用。（X为有${get.poptip('minifightpozhan')}的角色的“迫”的点数之和）`,
+            minifightlongzhan: '龙战',
+            minifightlongzhan_info: `战场技。①当你累计使用或打出至少X张牌后，进入“长坂坡战场”。②处于“界桥战场”时，你手牌中的【杀】和【闪】均视为【杀/闪】且使用【杀】的次数上限+X。当此牌当作【杀】使用或打出时，你可以获得一名其他角色的一张牌；当此牌当作【闪】使用或打出时，你可以视为对一名其他角色使用一张【杀】。③当你累计使用或打出至少X张【杀/闪】后，退出“长坂坡战场”。（X为本局游戏进入战场的次数，至少为1，至多为7）`,
+            minifightlixue: '沥血',
+            minifightlixue_info: '锁定技。一名角色进入战场时，你获得1点护甲；一名角色退出战场时，你摸两张牌。',
             //隐
             Myin_xushu: '隐徐庶',
             Myin_yuji: '隐于吉',
@@ -51611,6 +51624,11 @@ const packs = function () {
             '#ext:活动武将/audio/skill/miniyinshenmou1': '兵者，诡道也。',
             '#ext:活动武将/audio/skill/miniyinshenmou2': '不谋全局者，不足谋一域。',
             '#ext:活动武将/audio/die/Myin_jiaxu:die': '若早绝其后路，何至于此。',
+            '#ext:活动武将/audio/skill/minifightlongzhan1': '龙鳞裂野，血雨横空。',
+            '#ext:活动武将/audio/skill/minifightlongzhan2': '吾乃常山赵子龙！',
+            '#ext:活动武将/audio/skill/minifightlixue1': '出阵一身血，回马再争锋。',
+            '#ext:活动武将/audio/skill/minifightlixue2': '来回皆血路，征蹄作鼓声。',
+            '#ext:活动武将/audio/die/Mfight_zhaoyun:die': '若早绝其后路，何至于此。',
         },
     };
     MiNikill_sight();//加载欢杀界面逻辑

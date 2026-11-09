@@ -7289,6 +7289,10 @@
             "size": 103573
         },
         {
+            "path": "image/character/Mfight_zhaoyun.jpg",
+            "size": 136980
+        },
+        {
             "path": "image/character/Mfire_zhurong.jpg",
             "size": 140705
         },
@@ -9418,7 +9422,7 @@
         },
         {
             "path": "js/precontent/MiNikill.js",
-            "size": 3106026
+            "size": 3107754
         },
         {
             "path": "js/precontent/MiNikill_sight.js",
@@ -9454,7 +9458,7 @@
         },
         {
             "path": "js/precontent/index.js",
-            "size": 43362
+            "size": 43381
         },
         {
             "path": "js/precontent/模板.js",
