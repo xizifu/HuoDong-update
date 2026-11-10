@@ -37030,7 +37030,7 @@ const packs = function () {
                     if (event.source !== player) return false;
                     const evt = event.getParent(2);
                     if (!(event.getParent().type === 'card' && evt.name === 'useCard' && evt.player === player)) return false;
-                    if (typeof player.hp2 === 'number' && player.getHp() === Math.max(0, player.hp2) && player.isDamaged()) return true;
+                    if (typeof player.hp2 === 'number' && Math.max(0, player.hp) === Math.max(0, player.hp2)) return true;
                     return player.countCards('h', card => get.color(card) == 'red') * 2 > player.countCards('h') && player.hasCard(card => {
                         if (_status.connectMode && get.color(card) === 'h') return true;
                         return get.color(card) === 'red' && lib.filter.cardDiscardable(card, player);
@@ -37038,7 +37038,7 @@ const packs = function () {
                 },
                 direct: true,
                 async content(event, trigger, player) {
-                    if (typeof player.hp2 === 'number' && player.getHp() === Math.max(0, player.hp2) && player.isDamaged()) {
+                    if (typeof player.hp2 === 'number' && Math.max(0, player.hp) === Math.max(0, player.hp2)) {
                         const result = await player.chooseBool(`${get.translation(event.name)}：是否摸一张牌并回复1点体力？`).set('choice', get.effect(player, { name: 'draw' }, player, player) + get.recoverEffect(player, player, player) > 0).forResult();
                         if (result?.bool) {
                             player.logSkill(event.name);
@@ -37099,7 +37099,8 @@ const packs = function () {
                             if (['lose', 'loseAsync', 'equip', 'addJudge', 'gain', 'addToExpansion'].includes(event.name)) {
                                 if (!((event.getl?.(player)?.hs ?? []).length > 0 || (event.getg?.(player) ?? []).length > 0)) return false;
                             }
-                            const list = [player.countCards('h', { suit: 'heart' }), player.countCards('h', { suit: 'diamond' })];
+                            const num = player.countCards('h', card => get.color(card) == 'red');
+                            const list = [num, player.countCards('h') - num];
                             return [0, 1].some(index => player.storage.minitongdi_record[index] !== list[index]);
                         },
                         silent: true,
@@ -37110,8 +37111,9 @@ const packs = function () {
                             else if (player.isOnline2()) player.send(func, player, event.name);
                         },
                         func(player, name) {
-                            const list = player.storage[name] = [player.countCards('h', { suit: 'heart' }), player.countCards('h', { suit: 'diamond' })];
-                            player.addTip(name, `${get.translation('heart')}：${list[0]}；${get.translation('diamond')}：${list[1]}`);
+                            const num = player.countCards('h', card => get.color(card) == 'red');
+                            const list = [num, player.countCards('h') - num];
+                            player.addTip(name, `红：${list[0]}；非红：${list[1]}`);
                         },
                     },
                 },
