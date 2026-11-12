@@ -652,6 +652,25 @@ export async function precontent(bilibilicharacter) {
             next.setContent('bilibili_chooseTargetControl');
             return next;
         },
+        // 进入战场
+        enterBattleField(params) {
+            const next = game.createEvent('enterBattleField');
+            next.player = this;
+            Object.assign(next, params);
+            next.setContent('enterBattleField');
+            next._args = [...arguments];
+            return next;
+        },
+
+        // 退出战场
+        exitBattleField(params) {
+            const next = game.createEvent('exitBattleField');
+            next.player = this;
+            Object.assign(next, params);
+            next.setContent('exitBattleField');
+            next._args = [...arguments];
+            return next;
+        },
     });
     Object.assign(lib.element.content, {
         bilibili_chooseTargetControl: [
@@ -775,6 +794,63 @@ export async function precontent(bilibilicharacter) {
                 }
             },
         ],
+        enterBattleField: function (event, trigger, player) {
+            const { skill, fieldName, fieldTranslate, nature } = event;
+            player.$fullscreenpop(fieldTranslate, nature || 'fire');
+            game.log(player, '进入了', '#y' + fieldTranslate);
+            const background = `ext:活动武将/image/background/battlefield_${fieldName}.jpg`;
+            game.broadcastAll((background, skill, fieldName, fieldTranslate, player) => {
+                if (!ui.battleField) lib.setPopped((ui.battleField = ui.create.system('欢杀战场', null, true, true)), () => {
+                    if (!ui.battleField?.landItems?.size) return;
+                    const uiIntro = ui.create.dialog('hidden');
+                    for (const [skill, node] of ui.battleField.landItems) {
+                        const { player, fieldTranslate } = node;
+                        uiIntro.addText(`${fieldTranslate}--来源：${get.translation(player)}`).style.margin = '0';
+                        uiIntro._place_text = uiIntro.add(ui.create.div('.text', lib.translate[`${skill}_info`]));
+                        uiIntro.add(ui.create.div('.placeholder.slim'));
+                    }
+                    return uiIntro;
+                }, 200);
+
+                const landItems = ui.battleField.landItems || new Map();
+                if (landItems.has(skill)) {
+                    const node = landItems.get(skill);
+                    if (node) node.destroy();
+                }
+
+                _status.tempBackground = background;
+                game.updateBackground();
+
+                node = ui[`_${skill}_${fieldName}`] = ui.create.div('.battlefield.land-item');
+                node.skill = skill;
+                node.fieldName = fieldName;
+                node.fieldTranslate = fieldTranslate;
+                node.player = player;
+                node.classList.add('hidden');
+                ui.battleField.appendChild(node);
+                ui.refresh(node);
+                node.classList.remove('hidden');
+                node.destroy = () => {
+                    node.remove();
+                    delete ui[`_${skill}_${fieldName}`];
+                    ui.battleField.landItems.delete(skill);
+                };
+                landItems.set(skill, node);
+                ui.battleField.landItems = landItems;
+            }, background, skill, fieldName, fieldTranslate, player);
+            game.addVideo('skill', player, [skill, [true, background]]);
+        },
+        exitBattleField: function (event, trigger, player) {
+            const { skill, fieldName, fieldTranslate } = event;
+            game.log(player, '退出了', '#y' + fieldTranslate);
+            game.broadcastAll((skill, fieldName,) => {
+                const node = ui[`_${skill}_${fieldName}`];
+                if (node) node.destroy();
+                delete _status.tempBackground;
+                game.updateBackground();
+            }, skill, fieldName,);
+            game.addVideo('skill', player, [skill, [false]]);
+        },
     });
 
     //武将包和卡包
@@ -820,7 +896,7 @@ export async function precontent(bilibilicharacter) {
                 type: 'players',
                 data: (() => {
                     _status.HDWJ_ChangeLog_character = {
-                        MiNikill: ['Mbaby_shen_lvbu', 'Mbaby_zhugeruoxue', 'Mbabysp_xuhuang', 'Mbaby_dc_sb_pangtong', 'Mfight_zhaoyun', 'Mbaby_yue_zhouyu'],
+                        MiNikill: ['Mbaby_shen_lvbu', 'Mbaby_zhugeruoxue', 'Mbabysp_xuhuang', 'Mbaby_dc_sb_pangtong', 'Mfight_zhaoyun', 'Mbaby_yue_zhouyu', 'Mfight_huangzhong', 'Mfight_zhangliao', 'Mfight_luxun', 'Mfight_dianwei', 'Mfight_lvmeng', 'Mfight_yuanshao'],
                         WeChatkill: [],
                     };
                     return Object.values(_status.HDWJ_ChangeLog_character).flat();
