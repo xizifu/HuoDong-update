@@ -13921,7 +13921,7 @@ const packs = function () {
                                     return !ui.selected.cards.length && card.name == 'du' ? 1 : 0;
                                 },
                                 ai2(target) {
-                                    const player = player();
+                                    const player = get.player();
                                     const card = ui.selected.cards[0];
                                     if (card) return get.value(card, target) * get.attitude(player, target);
                                     return 0;

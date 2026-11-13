@@ -34552,7 +34552,7 @@ const packs = function () {
                     }, [1, Infinity]).set('ai', target => {
                         const player = get.player();
                         if (player.maxHp == 1) return 0;
-                        return get.effect(target, { name: 'darw' }, player, player);
+                        return get.effect(target, { name: 'draw' }, player, player);
                     }).forResult();
                 },
                 async content(event, trigger, player) {
@@ -44729,7 +44729,7 @@ const packs = function () {
                             return player.getStorage('minifightchuanglie_reentry').some(record => record.event == event);
                         },
                         async content(event, trigger, player) {
-                            const records = player.getStorage(event.name);
+                            const records = player.storage[event.name];
                             records.remove(records.find(record => record.event == trigger));
                             if (!player.getStorage(event.name).length) player.removeSkill(event.name);
                             if (!ui._minifightchuanglie_wancheng) await player.enterBattleField({
