@@ -7,7 +7,7 @@ const packs = function () {
         connect: true,
         characterSort: {
             MiNikill: {
-                MiNi_wei: ['zhanghu', 'yj_majun', 'caoyi', 'lvqian', 'hanlong', 'xiahoumao', 'guohuai', 'caochong', 'caochun', 'caoying', 'dc_jiachong', 'zhugeruoxue', 'dukui', 'xinpi', 'caimaozhangyun', 'bianyue', 'caoanmin', 'zhaoang', 'zhanggong', 'simalang', 'hanhaoshihuan', 'chentai', 'zhenghun', 'guanlu', 'guanqiujian', 'dc_liuye', 'chenlin', 'wangshuang', 'yanrou', 'dc_yanghu', 'ruanyu', 'chengyu', 'jianggan', 'yuejin', 'bianfuren', 'zhugedan', 'caohong', 'yinfuren', 'kuailiangkuaiyue', 'chenqun', 'xiahoulingnv', 'wenyang', 'caozhang', 'dufuren', 'yangxiu', 'zhangchangpu', 'zhonghui', 'caoxiu', 'xunyou', 'lidian', 'zhongyao', 'caozhen', 'guohuanghou', 'xinxianying', 'xiahouyuan', 'xizhicai', 'caorui', 'xunyu', 'dengai', 'caozhi', 'caopi', 'caoang', 'zhenji', 'old_caoren', 'zhangchunhua', 'xiahoudun', 'dianwei', 'zhanghe', 'yujin', 'xuhuang'].map(i => `Mbaby_${i}`),
+                MiNi_wei: ['dc_wangling', 're_duji', 'zhanghu', 'yj_majun', 'caoyi', 'lvqian', 'hanlong', 'xiahoumao', 'guohuai', 'caochong', 'caochun', 'caoying', 'dc_jiachong', 'zhugeruoxue', 'dukui', 'xinpi', 'caimaozhangyun', 'bianyue', 'caoanmin', 'zhaoang', 'zhanggong', 'simalang', 'hanhaoshihuan', 'chentai', 'zhenghun', 'guanlu', 'guanqiujian', 'dc_liuye', 'chenlin', 'wangshuang', 'yanrou', 'dc_yanghu', 'ruanyu', 'chengyu', 'jianggan', 'yuejin', 'bianfuren', 'zhugedan', 'caohong', 'yinfuren', 'kuailiangkuaiyue', 'chenqun', 'xiahoulingnv', 'wenyang', 'caozhang', 'dufuren', 'yangxiu', 'zhangchangpu', 'zhonghui', 'caoxiu', 'xunyou', 'lidian', 'zhongyao', 'caozhen', 'guohuanghou', 'xinxianying', 'xiahouyuan', 'xizhicai', 'caorui', 'xunyu', 'dengai', 'caozhi', 'caopi', 'caoang', 'zhenji', 'old_caoren', 'zhangchunhua', 'xiahoudun', 'dianwei', 'zhanghe', 'yujin', 'xuhuang'].map(i => `Mbaby_${i}`),
                 MiNi_shu: ['ol_jiangwan', 'dc_huangwudie', 'wuyi', 'ol_feiyi', 'wenyuan', 'xizheng', 'malingli', 'dc_wuban', 'pangtong', 'mifangfushiren', 'guanyue', 'xianglang', 'huanghao', 'zhaotongzhaoguang', 'wulan', 'leitong', 'zongyu', 're_mazhong', 're_dengzhi', 'dc_hujinding', 'jiangfei', 'zhangyi', 'guanzhang', 'wolongfengchu', 'wangtao', 'wangyue', 'xf_yiji', 'mizhu', 'mifuren', 'liuyong', 'ganfuren', 'lvkai', 'zhoucang', 'yangwan', 'liuchen', 'liyan', 'chendao', 'yanyan', 'xiahouba', 'huaman', 'sp_zhugeliang', 'zhugeguo', 'jianyong', 'wangping', 'mayunlu', 'guansuo', 'xiahoushi', 'shamoke', 'wuxian', 'zhugezhan', 'qinmi', 'guanyinping', 'guanyu', 'zhugeliang', 'liubei', 'machao', 'zhurong', 'zhangfei', 'zhaoyun', 'huangzhong', 'weiyan', 'liaohua', 'menghuo', 'ol_jiangwei', 'liushan', 'xin_fazheng', 'madai', 'guanping', 'liufeng', 'zhangxingcai', 'dongyun', 'xushu', 'xin_masu'].map(i => `Mbaby_${i}`),
                 MiNi_wu: ['sunhuan', 'gexuan', 'lvfan', 'xielingyu', 'zhupeilan', 'xugong', 'chendong', 'kanze', 're_panzhangmazhong', 'weiwenzhugezhi', 'zhangwen', 'dc_sunhanhua', 'heqi', 'lvdai', 'jiangqing', 're_guyong', 'quancong', 'yufan', 'dc_sunru', 'sunxiu', 'zhangfen', 'xuezong', 'panjun', 'luji', 'zhoufang', 'zhangxuan', 'yanjun', 'zhuhuan', 'luyusheng', 're_jsp_pangtong', 'sunhao', 'lukang', 'buzhi', 'xushi', 'zhugeke', 'zhoufei', 'zhangzhang', 'sunliang', 'sunjian', 'zhuzhi', 'bulianshi', 'chengpu', 'daqiao', 'ganning', 'huanggai', 'lusu', 'luxun', 'lvmeng', 'sunce', 'sunluban', 'sunluyu', 'sunquan', 'sunshangxiang', 'taishici', 'wuguotai', 'xiaoqiao', 'xusheng', 'old_zhoutai', 'zhouyu', 'zhugejin', 'zumao'].map(i => `Mbaby_${i}`),
                 MiNi_qun: ['xingdaorong', 'qiuliju', 'dc_sp_zhurong', 'tianfeng', 'xunchen', 'dongguiren', 'zhangren', 'kebineng', 'mangyachang', 're_hucheer', 'sp_duyu', 'ol_lisu', 'zhangchu', 'leibo', 'wangcan', 'diaochan', 'xurong', 're_taoqian', 'hejin', 'jiling', 'zhangrang', 'duanwei', 're_chendeng', 'caiyong', 'mengjie', 'dc_gaolan', 'yl_luzhi', 'tadun', 're_hansui', 'dongxie', 'fuwan', 'wutugu', 'huangfusong', 'fanchou', 'guosi', 'yanbaihu', 'dc_huangzu', 'licaiwei', 'ol_dingyuan', 'liubian', 're_pangdegong', 'zhangning', 'zhanglu', 'wangyun', 'zoushi', 'dc_huangchengyan', 'simahui', 'tw_mateng', 'laiyinger', 'sp_kongrong', 'zhujun', 'gongsunyuan', 'guotufengji', 'yanfuren', 'tangji', 'caojie', 'liangxing', 'caoxing', 'wangrong', 'hetaihou', 'zhangji', 'dongbai', 'beimihu', 'chunyuqiong', 'zhangqiying', 'fuhuanghou', 'liuxie', 'quyi', 'lijue', 'panfeng', 'liuzhang', 'jiaxu', 'zhangbao', 'zhangliang', 'gaoshun', 'caifuren', 'xuyou', 'pangde', 'yj_jushou', 'liru', 'dongzhuo', 'sp_zhangjiao', 'huatuo', 'lvbu', 'huaxiong', 'yuji', 'liubiao', 'yuanshao', 'yuanshu', 'chengong', 'zuoci'].map(i => `Mbaby_${i}`),
@@ -160,6 +160,8 @@ const packs = function () {
             Mbaby_ol_sb_xizhicai: ['male', 'wei', 3, ['olsbxinchuan', 'minisbjinjin']],
             Mbaby_re_zhanggong: ['male', 'wei', 3, ['minireqianxin', 'minizhenxing'], ['character:Mbaby_zhanggong']],
             Mbaby_dc_sb_dengai: ['male', 'wei', 4, ['dcsbzhouxi', 'minishijin']],
+            Mbaby_re_duji: ['male', 'wei', 3, ['miniandong', 'reyingshi']],
+            Mbaby_dc_wangling: ['male', 'wei', 4, ['minijichou', 'minimouli'], ['clan:太原王氏']],
             //蜀
             Mbaby_guanyu: ['male', 'shu', 4, ['miniwusheng']],
             Mbaby_re_guanyu: ['male', 'shu', 4, ['minirewusheng', 'minituodao', 'jsrgguanjue']],
@@ -8818,6 +8820,123 @@ const packs = function () {
                 },
 
             },
+            // 杜幾
+            miniandong: {
+                audio: 'reandong',
+                inherit: 'reandong',
+                async content(event, trigger, player) {
+                    const target = trigger.source, bool = player.storage.miniandong;
+                    let str = get.translation(player), result;
+                    if (bool) str = '自己';
+                    let choiceList = ['防止' + str + '即将受到的伤害，且本回合内红桃牌不计入' + (bool ? get.translation(target) : '自己') + '的手牌上限。'];
+                    if (!target.countCards('h')) choiceList.push('令' + str + '下次发动〖安东〗时改为自行选择');
+                    else choiceList.push('令' + str + '观看你的手牌并获得所有红桃牌');
+                    if (bool) {
+                        delete player.storage.miniandong;
+                        result = await player.chooseControl().set('choiceList', choiceList).set('prompt', '安东：请选择一项').forResult();
+                    } else result = await target.chooseControl().set('choiceList', choiceList).set('prompt', '安东：请选择一项').set('ai', function (event, target) {
+                        const player = event.player;
+                        const trigger = event.getTrigger();
+                        if (get.attitude(target, player) > 0) return 0;
+                        const hs = target.getGainableCards(player, 'h', card => get.suit(card) == 'heart');
+                        if (hs.length) {
+                            const recover = hs.filter(card => get.tag(card, 'save') || get.tag(card, 'recover')).length;
+                            if (trigger.num <= recover) return 0;
+                        }
+                        return 1;
+                    }).forResult();
+                    if (result?.index == 0) {
+                        target.addTempSkill('reandong_ignore');
+                        trigger.cancel();
+                        await game.delayx();
+                    } else {
+                        if (!target.countCards('h')) {
+                            player.storage.miniandong = true;
+                            await game.delayx();
+                        } else {
+                            await player.viewHandcards(target);
+                            const cards = target.getCards('h', card => {
+                                return get.suit(card, target) == 'heart' && lib.filter.canBeGained(card, target, player);
+                            });
+                            if (cards.length) await player.gain(cards, target, 'give', 'bySelf');
+                            else player.storage.miniandong = true;
+                        }
+                    }
+                },
+            },
+            // 王凌
+            minijichou: {
+                audio: 'dcjichou',
+                inherit: 'dcjichou',
+                async content(event, trigger, player) {
+                    const cards = [];
+                    player.checkHistory('useCard', evt => {
+                        cards.addArray(evt.cards.filterInD('d'));
+                    });
+                    const num = Math.min(cards.length, game.countPlayer());
+                    if (_status.connectMode) game.broadcastAll(() => {
+                        _status.noclearcountdown = true;
+                    });
+                    const { bool, links } = await player.chooseButton([`集筹：将${num < cards.length ? '至多' + get.cnNumber(num) + '张牌' : '任意张牌'}交给等量角色`, cards], 'allowChooseAll').set('selectButton', [1, num]).set('population', [game.countPlayer(current => get.attitude(player, current) > 0), game.countPlayer(current => get.attitude(player, current) < 0)]).set('ai', button => {
+                        const card = button.link, population = get.event().population;
+                        if (ui.selected.buttons.length > population[0] + population[1]) return 0;
+                        if (ui.selected.buttons.length > get.event().population[0]) return 2 - get.value(card);
+                        return 2 + get.value(card);
+                    }).forResult();
+                    if (bool) {
+                        const { bool, targets } = await player.chooseTarget(`集筹：请选择${get.cnNumber(links.length)}名角色`, `操作提示：请按照顺序选择要交给牌的目标，令这些角色按顺序获得这些牌：${get.translation(links)}`, true, links.length).set('values', links.map(i => get.value(i))).set("ai", target => {
+                            const att = get.attitude(get.player(), target);
+                            const chosenNum = ui.selected.targets.length, values = get.event().values;
+                            if (values[chosenNum] > 0) return att;
+                            return 0.01 - att;
+                        }).forResult();
+                        if (_status.connectMode) game.broadcastAll(() => {
+                            delete _status.noclearcountdown;
+                            game.stopCountChoose();
+                        });
+                        if (bool) {
+                            const gain_list = [], givenCards = [];
+                            targets.forEach((target, i) => {
+                                player.line(target, 'green');
+                                gain_list.push([target, links[i]]);
+                                givenCards.push(links[i]);
+                                game.log(player, '将', links[i], '交给了', target);
+                            });
+                            event.getParent().set('givenCards', givenCards);
+                            await game.loseAsync({
+                                gain_list,
+                                player: player,
+                                cards: givenCards,
+                                giver: player,
+                                animate: 'gain2',
+                            }).setContent('gaincardMultiple');
+                            const names = givenCards.map(card => card.name).toUniqued();
+                            await game.delayx();
+                            const newNames = names.filter(name => !player.getStorage(event.name).includes(name));
+                            if (newNames.length) player.markAuto(event.name, newNames);
+                            await player.draw(cards.length);
+                        }
+                    }
+                    if (_status.connectMode) game.broadcastAll(() => {
+                        delete _status.noclearcountdown;
+                        game.stopCountChoose();
+                    });
+                },
+            },
+            minimouli: {
+                audio: 'dcmouli',
+                inherit: 'dcmouli',
+                filter(event, player) {
+                    const names = [];
+                    player.checkAllHistory('useSkill', evt => {
+                        if (evt.skill !== 'minijichou') return;
+                        const evtx = evt.event;
+                        if (evtx.givenCards) names.addArray(evtx.givenCards.map((card) => get.name(card, false)));
+                    });
+                    return names.length > 5;
+                },
+                ai: { combo: 'minijichou' },
+            },
             //蜀
             //关羽
             miniwusheng: {
@@ -8861,7 +8980,7 @@ const packs = function () {
                 },
                 frequent: true,
                 async content(event, trigger, player) {
-                    const result = await player.chooseToGuanxing(game.countPlayer() <= 2 ? 3 : 5).set('prompt', "观星：点击或拖动将牌移动到牌堆顶或牌堆底").forResult();
+                    const result = await player.chooseToGuanxing(game.countPlayer() <= 2 ? 3 : 5).set('prompt', '观星：点击或拖动将牌移动到牌堆顶或牌堆底').forResult();
                     if ((!result.bool || !result.moved[0].length) && trigger.name == 'phaseZhunbei') player.addTempSkill('miniguanxing_on');
                 },
                 subSkill: { on: { charlotte: true } },
@@ -48577,6 +48696,8 @@ const packs = function () {
             Mbaby_ol_sb_xizhicai: '欢杀谋戏志才',
             Mbaby_re_zhanggong: '欢杀界张恭',
             Mbaby_dc_sb_dengai: '欢杀谋邓艾',
+            Mbaby_re_duji: '欢杀杜幾',
+            Mbaby_dc_wangling: '欢杀王凌',
             miniluoshen: '洛神',
             miniluoshen_info: '准备阶段，你可以进行一次判定并获得判定牌，若判定结果为黑色，你可重复此流程。',
             minireluoshen: '洛神',
@@ -48898,6 +49019,12 @@ const packs = function () {
             minizhenxing_info: '结束阶段开始时或当你受到伤害后，你可以观看牌堆顶的至多三张牌，然后你获得其中与其余牌花色均不相同的一张牌，并将其余牌标记为“信”，然后随机插入牌堆中。',
             minishijin: '恃矜',
             minishijin_info: '限定技，出牌阶段，若你本回合造成过伤害，你可以摸两张牌，且直到你的下个回合开始前，你受到伤害时防止之并摸一张牌。你的下个回合开始时，弃置所有【杀】并失去等量体力，若你未因此失去体力，此技能视为未发动过。',
+            miniandong: '安东',
+            miniandong_info: '当你受到其他角色造成的伤害时，你可以令伤害来源选择一项：1.防止此伤害。然后其♥牌不计入本回合的手牌上限；2.你观看其手牌并获得其中的所有♥牌。若其选择了选项2且你未因此获得牌，则你下次发动〖安东〗时改为自行选择。',
+            minijichou: '集筹',
+            minijichou_info: '结束阶段，若你本回合使用过牌且这些牌的牌名均不同，你可以观看位于弃牌堆中的这些牌，选择任意张牌并选择等量角色，将这些牌交给这些角色各一张，然后你摸X张牌（X为本回合因你使用而进入弃牌堆的牌名数）。',
+            minimouli: '谋立',
+            minimouli_info: `觉醒技。回合结束时，若你因${get.poptip('minijichou')}给出的牌的牌名总数大于5，你加1点体力上限并回复1点体力，然后获得${get.poptip('dczifu')}。`,
             //蜀
             Mbaby_guanyu: '欢杀关羽',
             Mbaby_re_guanyu: '欢杀界关羽',
