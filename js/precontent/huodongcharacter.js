@@ -3603,7 +3603,7 @@ const packs = function () {
                 audio: 'zhaxiang',
                 trigger: { player: ['loseHpEnd', 'damageEnd'] },
                 filter(event, player) {
-                    return player.hasCard('h', card => _status.connectMode || lib.filter.cardDiscardable(card, player, 'bilibili_zhaxiang'), 'h');
+                    return player.hasCards('h', card => _status.connectMode || lib.filter.cardDiscardable(card, player, 'bilibili_zhaxiang'));
                 },
                 async cost(event, trigger, player) {
                     event.result = await player.chooseToDiscard(get.prompt2(event.skill), 'allowChooseAll', 'chooseonly', [1, Infinity]).set('ai', lib.skill.zhiheng.check).forResult();
@@ -4005,7 +4005,7 @@ const packs = function () {
                 enable: 'chooseToUse',
                 viewAs: { name: 'wanjian' },
                 filterCard(card, player) {
-                    return !player.storage.oldluanji?.includes(get.suit(card));
+                    return !player.getStorage('oldluanji_count').includes(get.suit(card));
                 },
                 selectCard: 2,
                 check(card) {

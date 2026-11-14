@@ -548,3 +548,13 @@ td.dengjie-game > .button.character > .score.lose {
 	max-width: 100%;
 	box-sizing: border-box;
 }
+
+.handcards.miniyinyince > .card.miniyinyince {
+	background-image: var(--cardback-url) !important;
+	background-size: 100% 100% !important;
+	background-position: center !important;
+}
+
+.handcards.miniyinyince > .card.miniyinyince > * {
+	visibility: hidden !important;
+}

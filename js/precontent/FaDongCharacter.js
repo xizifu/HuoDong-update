@@ -292,7 +292,7 @@ const packs = function () {
             FD_niufudongxie: '伐董牛辅董翓',
             FD_niufudongxie_prefix: '伐董',
             bilibili_tunjun: '屯军',
-            bilibili_tunjun_info: '锁定技，每轮游戏开始时，若你的体力上限不为1，则你减1点体力上限，然后摸X张牌（X为你的体力上限）。',
+            bilibili_tunjun_info: '锁定技，每轮开始时，若你的体力上限不为1，则你减1点体力上限，然后摸X张牌（X为你的体力上限）。',
             bilibili_jiaoxia: '狡黠',
             bilibili_jiaoxia_info: '锁定技，友方角色的黑色手牌不计入手牌上限。',
             bilibili_jiaoxia_info_identity: '锁定技，你的黑色手牌不计入手牌上限。',

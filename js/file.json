@@ -353,6 +353,10 @@
             "size": 54230
         },
         {
+            "path": "audio/die/Mfight_yuanshao.mp3",
+            "size": 43694
+        },
+        {
             "path": "audio/die/Mfight_zhangliao.mp3",
             "size": 65972
         },
@@ -453,12 +457,32 @@
             "size": 78475
         },
         {
+            "path": "audio/die/Myin_jiaxu.mp3",
+            "size": 46574
+        },
+        {
             "path": "audio/die/Myin_xushu.mp3",
             "size": 56654
         },
         {
             "path": "audio/die/Myin_yuji.mp3",
             "size": 47726
+        },
+        {
+            "path": "audio/die/Myu_bianfuren.mp3",
+            "size": 45504
+        },
+        {
+            "path": "audio/die/Myu_caifuren.mp3",
+            "size": 43776
+        },
+        {
+            "path": "audio/die/Myu_ganfuren.mp3",
+            "size": 92736
+        },
+        {
+            "path": "audio/die/Myu_wuguotai.mp3",
+            "size": 58464
         },
         {
             "path": "audio/die/QH_caojie.mp3",
@@ -1997,6 +2021,14 @@
             "size": 41065
         },
         {
+            "path": "audio/skill/minifighthedou1.mp3",
+            "size": 33614
+        },
+        {
+            "path": "audio/skill/minifighthedou2.mp3",
+            "size": 33326
+        },
+        {
             "path": "audio/skill/minifightkuangji1.mp3",
             "size": 24764
         },
@@ -2019,6 +2051,14 @@
         {
             "path": "audio/skill/minifightmingtan2.mp3",
             "size": 40526
+        },
+        {
+            "path": "audio/skill/minifightpozhan1.mp3",
+            "size": 32750
+        },
+        {
+            "path": "audio/skill/minifightpozhan2.mp3",
+            "size": 31598
         },
         {
             "path": "audio/skill/minifightpozhen1.mp3",
@@ -3521,12 +3561,28 @@
             "size": 31310
         },
         {
+            "path": "audio/skill/miniyinshenmou1.mp3",
+            "size": 30158
+        },
+        {
+            "path": "audio/skill/miniyinshenmou2.mp3",
+            "size": 41390
+        },
+        {
             "path": "audio/skill/miniyinshi1.mp3",
             "size": 216576
         },
         {
             "path": "audio/skill/miniyinshi2.mp3",
             "size": 228070
+        },
+        {
+            "path": "audio/skill/miniyinyince1.mp3",
+            "size": 52046
+        },
+        {
+            "path": "audio/skill/miniyinyince2.mp3",
+            "size": 41966
         },
         {
             "path": "audio/skill/miniyinyinming1.mp3",
@@ -3583,6 +3639,70 @@
         {
             "path": "audio/skill/miniyuejian2.mp3",
             "size": 51669
+        },
+        {
+            "path": "audio/skill/miniyujiaoyin1.mp3",
+            "size": 44928
+        },
+        {
+            "path": "audio/skill/miniyujiaoyin2.mp3",
+            "size": 58176
+        },
+        {
+            "path": "audio/skill/miniyulingyu1.mp3",
+            "size": 49824
+        },
+        {
+            "path": "audio/skill/miniyulingyu2.mp3",
+            "size": 38592
+        },
+        {
+            "path": "audio/skill/miniyumeiyu1.mp3",
+            "size": 56736
+        },
+        {
+            "path": "audio/skill/miniyumeiyu2.mp3",
+            "size": 56736
+        },
+        {
+            "path": "audio/skill/miniyuqingxiao1.mp3",
+            "size": 33408
+        },
+        {
+            "path": "audio/skill/miniyuqingxiao2.mp3",
+            "size": 30816
+        },
+        {
+            "path": "audio/skill/miniyuquanyu1.mp3",
+            "size": 45216
+        },
+        {
+            "path": "audio/skill/miniyuquanyu2.mp3",
+            "size": 41184
+        },
+        {
+            "path": "audio/skill/miniyushiyu1.mp3",
+            "size": 34848
+        },
+        {
+            "path": "audio/skill/miniyushiyu2.mp3",
+            "size": 41760
+        },
+        {
+            "path": "audio/skill/miniyushuming1.mp3",
+            "size": 74880
+        },
+        {
+            "path": "audio/skill/miniyushuming2.mp3",
+            "size": 50400
+        },
+        {
+            "path": "audio/skill/miniyuxianyu1.mp3",
+            "size": 48384
+        },
+        {
+            "path": "audio/skill/miniyuxianyu2.mp3",
+            "size": 46080
         },
         {
             "path": "audio/skill/minizecai1.mp3",
@@ -5106,7 +5226,7 @@
         },
         {
             "path": "extension.css",
-            "size": 11068
+            "size": 11346
         },
         {
             "path": "extension.js",
@@ -5129,7 +5249,7 @@
             "size": 1195712
         },
         {
-            "path": "image/background/battlefield_dingjun.jpg",
+            "path": "image/background/battlefield_dingjunshan.jpg",
             "size": 114244
         },
         {
@@ -5441,6 +5561,10 @@
             "size": 108592
         },
         {
+            "path": "image/character/Mbaby_dc_huangwudie.jpg",
+            "size": 153046
+        },
+        {
             "path": "image/character/Mbaby_dc_huangzu.jpg",
             "size": 120613
         },
@@ -5461,12 +5585,20 @@
             "size": 93137
         },
         {
+            "path": "image/character/Mbaby_dc_sb_dengai.jpg",
+            "size": 149460
+        },
+        {
             "path": "image/character/Mbaby_dc_sb_liuxie.jpg",
             "size": 149272
         },
         {
             "path": "image/character/Mbaby_dc_sb_lusu.jpg",
             "size": 130606
+        },
+        {
+            "path": "image/character/Mbaby_dc_sb_pangtong.jpg",
+            "size": 139885
         },
         {
             "path": "image/character/Mbaby_dc_sb_xunyu.jpg",
@@ -5483,6 +5615,10 @@
         {
             "path": "image/character/Mbaby_dc_sunru.jpg",
             "size": 127322
+        },
+        {
+            "path": "image/character/Mbaby_dc_wangling.jpg",
+            "size": 173410
         },
         {
             "path": "image/character/Mbaby_dc_wuban.jpg",
@@ -5663,10 +5799,6 @@
         {
             "path": "image/character/Mbaby_huanghao.jpg",
             "size": 67129
-        },
-        {
-            "path": "image/character/Mbaby_huangwudie.jpg",
-            "size": 153046
         },
         {
             "path": "image/character/Mbaby_huangzhong.jpg",
@@ -5917,6 +6049,10 @@
             "size": 154314
         },
         {
+            "path": "image/character/Mbaby_ol_jiangwan.jpg",
+            "size": 140759
+        },
+        {
             "path": "image/character/Mbaby_ol_jiangwei.jpg",
             "size": 117661
         },
@@ -5951,6 +6087,10 @@
         {
             "path": "image/character/Mbaby_ol_sb_jiangwei.jpg",
             "size": 144178
+        },
+        {
+            "path": "image/character/Mbaby_ol_sb_xizhicai.jpg",
+            "size": 155704
         },
         {
             "path": "image/character/Mbaby_ol_sunjian.jpg",
@@ -6051,6 +6191,10 @@
         {
             "path": "image/character/Mbaby_re_diaochan.jpg",
             "size": 113055
+        },
+        {
+            "path": "image/character/Mbaby_re_duji.jpg",
+            "size": 139267
         },
         {
             "path": "image/character/Mbaby_re_fazheng.jpg",
@@ -6287,10 +6431,6 @@
         {
             "path": "image/character/Mbaby_sb_xiahoushi.jpg",
             "size": 750157
-        },
-        {
-            "path": "image/character/Mbaby_sb_xizhicai.jpg",
-            "size": 155704
         },
         {
             "path": "image/character/Mbaby_sb_xuhuang.jpg",
@@ -6737,6 +6877,10 @@
             "size": 143068
         },
         {
+            "path": "image/character/Mbaby_xingdaorong.jpg",
+            "size": 153683
+        },
+        {
             "path": "image/character/Mbaby_xinpi.jpg",
             "size": 123317
         },
@@ -6879,6 +7023,10 @@
         {
             "path": "image/character/Mbaby_yue_zhoufei.jpg",
             "size": 158835
+        },
+        {
+            "path": "image/character/Mbaby_yue_zhouyu.jpg",
+            "size": 142790
         },
         {
             "path": "image/character/Mbaby_yuejin.jpg",
@@ -7149,8 +7297,16 @@
             "size": 98661
         },
         {
+            "path": "image/character/Mfight_yuanshao.jpg",
+            "size": 156481
+        },
+        {
             "path": "image/character/Mfight_zhangliao.jpg",
             "size": 103573
+        },
+        {
+            "path": "image/character/Mfight_zhaoyun.jpg",
+            "size": 136980
         },
         {
             "path": "image/character/Mfire_zhurong.jpg",
@@ -7257,12 +7413,32 @@
             "size": 141705
         },
         {
+            "path": "image/character/Myin_jiaxu.jpg",
+            "size": 120554
+        },
+        {
             "path": "image/character/Myin_xushu.jpg",
             "size": 144823
         },
         {
             "path": "image/character/Myin_yuji.jpg",
             "size": 124177
+        },
+        {
+            "path": "image/character/Myu_bianfuren.jpg",
+            "size": 153390
+        },
+        {
+            "path": "image/character/Myu_caifuren.jpg",
+            "size": 145740
+        },
+        {
+            "path": "image/character/Myu_ganfuren.jpg",
+            "size": 143719
+        },
+        {
+            "path": "image/character/Myu_wuguotai.jpg",
+            "size": 172903
         },
         {
             "path": "image/character/QH_caojie.jpg",
@@ -8247,6 +8423,10 @@
         {
             "path": "image/character/wechat_sb_caocao.jpg",
             "size": 164021
+        },
+        {
+            "path": "image/character/wechat_sb_caoren.jpg",
+            "size": 219327
         },
         {
             "path": "image/character/wechat_sb_diaochan.jpg",
@@ -9242,7 +9422,7 @@
         },
         {
             "path": "js/precontent/FaDongCharacter.js",
-            "size": 20832
+            "size": 20826
         },
         {
             "path": "js/precontent/HD_chaoshikong.js",
@@ -9254,11 +9434,11 @@
         },
         {
             "path": "js/precontent/MiNiAppkill.js",
-            "size": 221218
+            "size": 223491
         },
         {
             "path": "js/precontent/MiNikill.js",
-            "size": 2986419
+            "size": 3113343
         },
         {
             "path": "js/precontent/MiNikill_sight.js",
@@ -9266,7 +9446,7 @@
         },
         {
             "path": "js/precontent/WeChatkill.js",
-            "size": 1543919
+            "size": 1565672
         },
         {
             "path": "js/precontent/WeChatkill_sight.js",
@@ -9290,11 +9470,11 @@
         },
         {
             "path": "js/precontent/huodongcharacter.js",
-            "size": 926174
+            "size": 945467
         },
         {
             "path": "js/precontent/index.js",
-            "size": 43779
+            "size": 47936
         },
         {
             "path": "js/precontent/模板.js",
