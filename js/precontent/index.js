@@ -896,7 +896,7 @@ export async function precontent(bilibilicharacter) {
                 type: 'players',
                 data: (() => {
                     _status.HDWJ_ChangeLog_character = {
-                        MiNikill: ['Mbaby_shen_lvbu', 'Mbaby_zhugeruoxue', 'Mbabysp_xuhuang', 'Mbaby_dc_sb_pangtong', 'Mfight_zhaoyun', 'Mbaby_yue_zhouyu', 'Mfight_huangzhong', 'Mfight_zhangliao', 'Mfight_luxun', 'Mfight_dianwei', 'Mfight_lvmeng', 'Mfight_yuanshao'],
+                        MiNikill: ['Mbaby_shen_lvbu', 'Mbaby_zhugeruoxue', 'Mbabysp_xuhuang', 'Mbaby_dc_sb_pangtong', 'Mfight_zhaoyun', 'Mbaby_yue_zhouyu', 'Mfight_huangzhong', 'Mfight_zhangliao', 'Mfight_luxun', 'Mfight_dianwei', 'Mfight_lvmeng', 'Mfight_yuanshao', 'Mbaby_re_duji', 'Mbaby_dc_wangling'],
                         WeChatkill: [],
                     };
                     return Object.values(_status.HDWJ_ChangeLog_character).flat();

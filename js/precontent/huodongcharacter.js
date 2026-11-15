@@ -3139,7 +3139,7 @@ const packs = function () {
                             }
                             else event._result = { bool: false };
                             'step 2'
-                            if (!result?.bool || !result.cards?.some(card => get.type2(trigger.card) == get.type2(card))) {
+                            if (!result?.bool || result.cards?.some(card => get.type2(trigger.card) == get.type2(card))) {
                                 player.popup('杯具');
                                 player.loseHp();
                                 player.tempBanSkill('bilibili_taoluan');
@@ -15028,15 +15028,15 @@ const packs = function () {
             boljianhe_info: '出牌阶段，你可以重铸至少两张同名牌或装备牌，令一名角色选择一项：①重铸X-1张与本次重铸的牌类别相同的牌；②受到1点伤害。',
             bolbihun: '弼昏',
             bolbihun_info: '锁定技，当你于一名角色的回合内摸牌后，你选择本回合未选择过的一项：①摸两张牌；②将手牌数弃置至当前回合角色的手牌上限；③本回合不能对回合角色外的角色使用牌。',
-            bfake_hanshao: '蝶设韩融',
+            bfake_hanshao: '蝶设韩韶',
             bfake_hanshao_prefix: '蝶设',
             bollianhe: '连和',
-            bollianhe_info: '出牌阶段限一次。你可以横置两名角色并令其同时选择一项：1.令你摸一张牌；2.令你获得其一张牌。然后其获得以下效果：其下个出牌阶段结束时，重复选择至其所选项序号数之和大于X（X为其此阶段获得牌数，且至多为5）。',
+            bollianhe_info: '出牌阶段限一次。你可以横置两名角色并令其同时选择一项：1.令你摸一张牌；2.令你获得其一张牌并翻面。然后其获得以下效果：其下个出牌阶段结束时，重复选择至其所选项序号数之和大于X（X为其此阶段获得牌数，且至多为5）。',
             bolhuanjia: '缓颊',
             bolhuanjia_info: '出牌阶段限一次。你可以拼点。赢的男性角色下次发动“出牌阶段限一次”的技能后复原之。',
             bolxumin: '恤民',
             bolxumin_info: '宗族技，限定技。出牌阶段，你可以将武将牌翻面，视为对任意名手牌数少于你的角色使用【五谷丰登】。',
-            bfake_hanrong: '蝶设韩韶',
+            bfake_hanrong: '蝶设韩融',
             bfake_hanrong_prefix: '蝶设',
             bolfangzhen: '放赈',
             bolfangzhen_info: '出牌阶段限一次。你可以横置一名角色，将手牌摸至X张并交给其任意张牌。若为第X次发动本技能，你翻面（X为其座次号且至多为5）。',

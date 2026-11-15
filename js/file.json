@@ -5617,6 +5617,10 @@
             "size": 127322
         },
         {
+            "path": "image/character/Mbaby_dc_wangling.jpg",
+            "size": 173410
+        },
+        {
             "path": "image/character/Mbaby_dc_wuban.jpg",
             "size": 128118
         },
@@ -6187,6 +6191,10 @@
         {
             "path": "image/character/Mbaby_re_diaochan.jpg",
             "size": 113055
+        },
+        {
+            "path": "image/character/Mbaby_re_duji.jpg",
+            "size": 139267
         },
         {
             "path": "image/character/Mbaby_re_fazheng.jpg",
@@ -9426,11 +9434,11 @@
         },
         {
             "path": "js/precontent/MiNiAppkill.js",
-            "size": 223491
+            "size": 223541
         },
         {
             "path": "js/precontent/MiNikill.js",
-            "size": 3104638
+            "size": 3113393
         },
         {
             "path": "js/precontent/MiNikill_sight.js",
@@ -9462,11 +9470,11 @@
         },
         {
             "path": "js/precontent/huodongcharacter.js",
-            "size": 926181
+            "size": 926189
         },
         {
             "path": "js/precontent/index.js",
-            "size": 47258
+            "size": 47296
         },
         {
             "path": "js/precontent/模板.js",

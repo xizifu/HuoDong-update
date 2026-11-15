@@ -134,7 +134,8 @@ const packs = function () {
                     global: 'loseAsyncAfter',
                 },
                 filter(event, player) {
-                    if (event.getParent('phaseDraw', true)) return false;
+                    const evt = event.getParent('phaseDraw');
+                    if (evt?.player == player) return false;
                     return (event.getg?.(player) ?? []).length > 0;
                 },
                 async cost(event, trigger, player) {
