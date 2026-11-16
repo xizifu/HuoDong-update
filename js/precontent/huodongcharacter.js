@@ -40,13 +40,15 @@ const packs = function () {
             bilibili_zhengxuan: ['male', 'qun', 3, ['bilibili_zhengjing'], ['character:zhengxuan', 'die:zhengxuan', 'name:郑|玄']],
             bilibili_sunhanhua: ['female', 'wu', 3, ['bilibili_chongxu', 'miaojian', 'shhlianhua'], ['character:sunhanhua', 'die:sunhanhua', 'name:孙|寒华']],
             bilibili_lonelypatients: ['male', 'key', 4, ['bilibili_meihua', 'bilibili_zhengyou'], ['clan:活动群', 'name:独孤|null']],
-            bilibili_kuangshen: ['male', 'key', '110/3', [], ['clan:宿舍群|肘击群', 'unseen']],
+            bilibili_kuangshen: ['male', 'key', '110/110/3', ['bilibili_ouda', 'bilibili_huigun', 'bilibili_xiufu'], ['clan:宿舍群|肘击群', 'extraCharacter:bilibili_daishu:bilibili_yuefei', 'unseen']],
+            bilibili_daishu: ['male', 'bilibili_sushe', '110/110/3', ['bilibili_aozhouchiyuan'], ['unseen']],
+            bilibili_yuefei: ['male', 'bilibili_zhouji', '110/110/3', ['bilibili_jingzhongbaoguo'], ['unseen']],
             bilibili_shen_guojia: ['male', 'wei', '9/9/5', ['stianyi', 'resghuishi', 'bilibili_huishi'], ['doublegroup:shen:wei:wu', 'die:shen_guojia']],
             bilibili_re_xusheng: ['male', 'wu', 4, ['bilibili_pojun', 'kuangcai', 'bilibili_baodao'], ['die:re_xusheng']],
             bilibili_xushao: ['male', 'qun', 3, ['bol_pinjian', 'bol_yuedan'], ['die:xushao']],
             bilibili_ningjingzhiyuan: ['male', 'key', 4, ['bilibili_xiezhi', 'bilibili_fazhou'], ['clan:肘家军|宿舍群|肘击群|活动群', 'name:闹动|导近']],
             bilibili_xizhicaikobe: ['male', 'key', 4, ['bilibili_zhangcai', 'bilibili_laosao'], ['clan:肘家军|宿舍群|肘击群|活动群', 'name:戏|子宓']],
-            bilibili_yanjing: ['male', 'key', 3, ['bilibili_mingcha', 'bilibili_huiyan', 'bilibili_kamiman'], ['clan:肘家军|宿舍群|肘击群|活动群', 'tooenough|眼睛']],
+            bilibili_yanjing: ['male', 'key', 3, ['bilibili_mingcha', 'bilibili_huiyan', 'bilibili_kamiman'], ['clan:肘家军|宿舍群|肘击群|活动群', 'tooenough|眼睛', `extraCharacter:${Array.from({ length: 3 }).map((_, i) => `bilibili_yanjing_friend${i + 1}`).join(':')}`]],
             bilibili_yanjing_friend1: ['female', 'qun', 3, ['bilibili_roulin', 'bilibili_shenren'], ['unseen']],
             bilibili_yanjing_friend2: ['male', 'qun', '4/5', ['bilibili_benghuai', 'bilibili_shenren'], ['unseen']],
             bilibili_yanjing_friend3: ['male', 'qun', '3/4', ['bilibili_yaowu', 'bilibili_shenren'], ['unseen']],
@@ -69,7 +71,7 @@ const packs = function () {
             bilibili_zhugeliang: ['male', 'shu', 3, ['bilibili_lianbing'], ['name:诸葛|亮', 'clan:琅琊诸葛氏']],
             bilibili_shibing: ['male', 'shu', Infinity, ['bilibili_tongshuai'], ['name:null|null', 'character:haopu', 'unseen']],
             bilibili_majun: ['male', 'wei', 3, ['xinfu_jingxie', 'bilibili_qiaosi'], ['character:majun', 'die:majun', 'name:马|钧']],
-            bilibili_yunshiyiyu: ['male', 'key', 4, [], ['clan:宿舍群|肘击群|活动群', 'unseen']],
+            bilibili_yunshiyiyu: ['male', 'key', 4, ['bilibili_langzhong', 'bilibili_jiyuan', 'bilibili_lunzhi'], ['clan:宿舍群|肘击群|活动群', 'unseen']],
             //双面武将--正面
             bilibili_wangtao: ['female', 'shu', 3, ['huguan', 'yaopei', 'dualside'], ['dualside:bilibili_x_wangyue', 'character:wangtao', 'die:wangtao']],
             bilibili_wangyue: ['female', 'shu', 3, ['huguan', 'mingluan', 'dualside'], ['dualside:bilibili_x_wangtao', 'character:wangyue', 'tempname:wangyue', 'die:wangyue']],
@@ -125,6 +127,9 @@ const packs = function () {
             bilibili_ningjingzhiyuan: '宁静致远，俗称牢宁，赛尔号抽象玩家，“科密”萌新转型中的心腹，喜爱肘击群，现负责维持群内秩序并将违规群友抓进小黑屋肘击群，肘家军大将之一，抽象集大成者。',
             bilibili_xizhicaikobe: '戏志才，抽象社恐人士，肘家军大将之一，无名杀<span style="text-decoration: line-through;">非</span>专业人士和爱好者，萌新转型中的任务召唤人。孩子们，其实牢戏<span style="text-decoration: line-through;">并不</span>想要。',
             bilibili_yanjing: '路边一条',
+            bilibili_yanjing_friend1: '路边一条',
+            bilibili_yanjing_friend2: '路边一条',
+            bilibili_yanjing_friend3: '路边一条',
             bilibili_xiaoyaoruyun: '逍遥如云，肘击群内抽象人士之一<span style="text-decoration: line-through;">（孩子们，其实是牢萌干的，我有十分甚至九分确信是他害的）</span>，因在各大（其实仅一小部分）无名杀群聊内大肆（其实规模并没有那么大）传播病毒武将扩展（其实真的有病毒，还有木马和蠕虫），从而变得（其实并不怎么）出名，至今仍在各大无名杀群聊里逍遥法外（迫真）。',
             bilibili_shuijiaobuboli: '睡觉不玻璃，活动群活跃元老之一，为懒狗萌新（转型中）做尽宣传和bug收集的任务。三年过去了，她终于得到了属于自己的专属武将<span style="text-decoration: line-through;">萌新（转型中）就是个大懒棒！</span>。',
             bilibili_wuzhuwanshui: '你说得对但是我的名字是凤凰院凶真，年龄十九岁，家住在秋叶原，天天在lab里面忙着拯救世界，我每天都要熬到凌晨六点，从来不做保健操，静静观测这个世界并且爱护我亲爱的助手——克里斯蒂↑～娜↓～，我每天都要灌大量的胡椒博士，不经常看医生但是我的身体一定非常健康。<br>噫！这搬史，可真是一门学问啊！要如何把热乎的构思端给群友呢？倘若是直接呈上去，未免馨香扑鼻让人倍感惊恐，所以就需要用聊天记录套一层，来欢迎大家细细品味啊！<br>有人问，天下的构思如此之多，你搬得完吗？那当然是搬不完的，可是让眼前之人吃好吃饱，就是我们史官的溯源与目标。我们一定会为了群友的营养健康勤奋工作，积极投喂各种内容，保证群友身体健康营养均衡。',
@@ -386,6 +391,13 @@ const packs = function () {
                     basic: { equipValue: 15 },
                 },
                 derivation: 'bilibili_yirenyixiaojian',
+            },
+            //中药
+            bilibili_yaria: {
+                image: 'ext:活动武将/image/skin/bilibili_yunshiyiyu/农太公.png',
+                fullimage: true,
+                type: 'basic',
+                //derivation: 'bilibili_yunshiyiyu',
             },
         },
         skill: {
@@ -11408,6 +11420,18 @@ const packs = function () {
                     result: { player: 1 },
                 },
             },
+            bilibili_ouda: {
+            },
+            bilibili_huigun: {
+            },
+            bilibili_xiufu: {
+            },
+            bilibili_aozhouchiyuan: {
+                nobracket: true,
+            },
+            bilibili_jingzhongbaoguo: {
+                nobracket: true,
+            },
             //吾猪万睡
             bilibili_diaowen: {
                 trigger: { global: ['useCardAfter', 'damageBegin4'] },
@@ -14384,6 +14408,13 @@ const packs = function () {
                     }
                 },
             },
+            //农太公
+            bilibili_langzhong: {
+            },
+            bilibili_jiyuan: {
+            },
+            bilibili_lunzhi: {
+            },
         },
         dynamicTranslate: {
             bilibili_xueji(player) {
@@ -14811,10 +14842,32 @@ const packs = function () {
             })}。`,
             bilibili_zhijiang: '植僵',
             bilibili_zhijiang_info: `出牌阶段限一次，你可以游玩5-8分钟的“植物大战僵尸”，然后获得游戏秒数的的${get.poptip('manbaout')}。`,
-            bilibili_zhijiang_append: `<span style="font-family:yuanli">${[
+            bilibili_ouda: '殴打',
+            bilibili_ouda_info: '你的手牌上限为0，当你使用牌后，其他角色可以弃置一张同名牌，对你造成此牌点数点伤害；每轮结束时，若你未因此受到伤害，你受到1/11.03点无来源伤害（向下取整）。',
+            bilibili_huigun: '回滚',
+            bilibili_huigun_info: '锁定技，回合结束时，你视为逆序使用本回合你使用的基本牌或普通锦囊牌直到无法使用，若你因此使用完这些顺序的所有牌，你摸[24]张牌并弃置[8]张牌，否则你摸[8]张牌并弃置[24]张牌。',
+            bilibili_xiufu: '修复',
+            bilibili_xiufu_info: `锁定技，限定技，当你的体力值首次小于10点后，你在上下家分别召唤${get.poptip({
+                id: `character_bilibili_daishu`,
+                name: `“袋鼠”`,
+                type: 'character',
+                dialog: 'characterDialog',
+            })}和${get.poptip({
+                id: `character_bilibili_yuefei`,
+                name: `“岳飞”`,
+                type: 'character',
+                dialog: 'characterDialog',
+            })}，且“袋鼠”代替你受到伤害，“岳飞”代替你造成伤害；你死亡后，“袋鼠”和“岳飞”离场。`,
+            bilibili_xiufu_append: `<span style="font-family:yuanli">${[
                 'v1.10.3.1版本更新内容',
                 '※殴打@kuangshen04，回滚这位开发者提交的Pull Request，修复技能的group失效的bug',
             ].join('<br>')}</span>`,
+            bilibili_daishu: '袋鼠',
+            bilibili_aozhouchiyuan: '澳洲驰援',
+            bilibili_aozhouchiyuan_info: '锁定技，狂神计算与其他角色的距离-1；其他角色计算与狂神的距离+1；当你受到伤害后，伤害来源获得此技能直到其回合开始。',
+            bilibili_yuefei: '岳飞',
+            bilibili_jingzhongbaoguo: '精忠报国',
+            bilibili_jingzhongbaoguo_info: '锁定技，狂神对其他角色造成的伤害+1；其他角色对狂神造成的伤害-1；当你造成伤害后，受伤角色获得此技能直到其回合结束。',
             bilibili_shen_guojia: '知箸侠',
             bilibili_huishi: '慧识',
             bilibili_huishi_info: '限定技，出牌阶段限一次，若你的体力上限小于10，你可进行判定牌不置入弃牌堆的判定。若判定结果与本次发动技能时的其他判定结果的花色均不相同且你的体力上限小于10，则你加1点体力上限，且可以重复此流程。然后你将所有位于处理区的判定牌交给一名角色。若其手牌数为全场最多，则你减1点体力上限。',
@@ -15094,7 +15147,15 @@ const packs = function () {
             bilibili_qiaosi: '巧思',
             bilibili_qiaosi_info: '出牌阶段限一次，你可以表演水转百戏图，若表演成功，你获得对应的卡牌，然后选择一项：①将等量张牌交给一名其他角色；②弃置等量张牌。',
             bilibili_yunshiyiyu: '云时亦雨',
-            bilibili_append: '<span style="font-family:yuanli">啊啊啊啊啊牢萌我阿米诺斯</span>',
+            bilibili_langzhong: '郎中',
+            bilibili_langzhong_info: '每个回合开始时，若你没有中药罐，则获得一个空的中药罐，否则你为中药罐随机添加一个属性（至多四个，设计来源炼金术师三技能）；回合结束时，若你有非空中药罐，你可以令一名角色服用之。',
+            bilibili_jiyuan: '羁渊',
+            bilibili_jiyuan_info: `使命技。使命：游戏开始时或当你获得此技能后，你为牌堆洗入[67]张${get.poptip('bilibili_yaria')}；出牌阶段限一次，你可以弃置任意张牌并获得牌堆中等量的${get.poptip('bilibili_yaria')}。<br>成功：当你获得牌堆中的${get.poptip('bilibili_yaria')}时，若牌堆没有${get.poptip('bilibili_yaria')}，你回复[78]点体力，摸[91]张牌。<br>失败：其他角色获得牌堆中的${get.poptip('bilibili_yaria')}时，若牌堆没有${get.poptip('bilibili_yaria')}，你弃置[78]张牌，然后你不可响应其他角色对你使用的下[91]张牌。`,
+            bilibili_yaria: '中药',
+            bilibili_yaria_info: '出牌阶段限一次，对自己使用。目标角色获得1点护甲并回复1点体力。如果目标是云时亦雨，则此牌不计入次数且改为获得2点护甲并回复2点体力。',
+            bilibili_lunzhi: '轮植',
+            bilibili_lunzhi_info: '转换技，锁定技。回合开始时，阳：本回合所有出牌阶段和弃牌阶段修改为摸牌阶段；阴：本回合所有摸牌阶段和弃牌阶段修改为出牌阶段。',
+            bilibili_lunzhi_append: '<span style="font-family:yuanli">啊啊啊啊啊牢萌我阿米诺斯</span>',
         },
     };
     for (const i in huodongcharacter.character) {

@@ -7597,6 +7597,10 @@
             "size": 110820
         },
         {
+            "path": "image/character/bilibili_daishu.jpg",
+            "size": 65859
+        },
+        {
             "path": "image/character/bilibili_daxiao.jpg",
             "size": 182551
         },
@@ -7711,6 +7715,10 @@
         {
             "path": "image/character/bilibili_yirenyixiaojian.jpg",
             "size": 119933
+        },
+        {
+            "path": "image/character/bilibili_yuefei.jpg",
+            "size": 122402
         },
         {
             "path": "image/character/bilibili_yunshiyiyu.jpg",
@@ -9486,7 +9494,7 @@
         },
         {
             "path": "js/precontent/huodongcharacter.js",
-            "size": 928013
+            "size": 932977
         },
         {
             "path": "js/precontent/index.js",
