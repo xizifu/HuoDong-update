@@ -275,6 +275,7 @@ const packs = function () {
             bilibili_longjiuzhen: '赛蛆',
             bilibili_yirenyixiaojian: '肘击群大西王',
             bilibili_zhugeliang: '孔明何等人物？只要有钱粮在手，他马上会变出十万精兵来！',
+            bilibili_yunshiyiyu: '软辅猎手',
         },
         characterSubstitute: {
             bilibili_gaowang: [
@@ -11754,9 +11755,7 @@ const packs = function () {
                         dialog.add([(() => {
                             let cards = [];
                             game.countPlayer(target => {
-                                if (target !== player && target.hasSkill('bilibili_siyu')) {
-                                    cards.addArray(target.getExpansions('bilibili_siyu'));
-                                }
+                                if (target !== player && target.hasSkill('bilibili_siyu')) cards.addArray(target.getExpansions('bilibili_siyu'));
                             });
                             return cards.map(card => [card, get.translation(get.owner(card))]);
                         })(), (item, type, position, noclick, node) => {
