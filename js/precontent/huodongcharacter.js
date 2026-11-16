@@ -8,7 +8,7 @@ const packs = function () {
         characterSort: {
             huodongcharacter: {
                 Chuodong: ['bilibili_shengxunyu', 'bilibili_Firewin', 'bilibili_jinglingqiu', 'bilibili_suixingsifeng', 'bilibili_Emptycity', 'bilibili_thunderlei', 'bilibili_lonelypatients', 'bilibili_ningjingzhiyuan', 'bilibili_xizhicaikobe'],
-                CDormitory: ['bilibili_yirenyixiaojian', 'bilibili_longjiuzhen', 'bilibili_diandian', 'bilibili_murufengchen', 'bilibili_wuzhuwanshui', 'bilibili_kuangshen', 'bilibili_yanjing', ...Array.from({ length: 3 }).map((_, index) => `bilibili_yanjing_friend${index + 1}`), 'bilibili_xiaoyaoruyun', 'bilibili_shuijiaobuboli'],
+                CDormitory: ['bilibili_yunshiyiyu', 'bilibili_yirenyixiaojian', 'bilibili_longjiuzhen', 'bilibili_diandian', 'bilibili_murufengchen', 'bilibili_wuzhuwanshui', 'bilibili_kuangshen', 'bilibili_yanjing', ...Array.from({ length: 3 }).map((_, index) => `bilibili_yanjing_friend${index + 1}`), 'bilibili_xiaoyaoruyun', 'bilibili_shuijiaobuboli'],
                 Cothers: ['bilibili_majun', 'lz_sufei', 'lz_tangzi', 'lz_liuqi', 'lz_huangquan', 'bilibili_zhugeliang', 'bilibili_caocao', 'bilibili_xiahoudun', 'bilibili_liuguanzhang', 'bilibili_gaowang', 'bilibili_simayi', 'old_dongxie', 'bilibili_sunhanhua', 'bilibili_zhoutaigong', 'bilibili_zhouxiaomei', 'bilibili_caifuren', 'bilibili_zhengxuan', 'bilibili_sp_xuyou', 'old_zuoci', 'bilibili_kuailiangkuaiyue', 'bilibili_wuqiao', 'bilibili_daxiao', 'bilibili_xushao', 'bilibili_shen_guojia', 'bilibili_re_xusheng', 'bilibili_zhangrang', 'bilibili_litiansuo', 'decade_huangwudie', 'bilibili_huanggai', 'bilibili_ekeshaoge', 'bilibili_guanning', 'bilibili_wangwang', 'diy_lvmeng', 'bilibili_wangtao', 'bilibili_wangyue', 'bilibili_x_wangtao', 'bilibili_x_wangyue', 'bilibili_daqiao', 'bilibili_xiaoqiao', 'bilibili_x_daqiao', 'bilibili_x_xiaoqiao', 'bilibili_ahuinan', 'bilibili_dongtuna', 'bilibili_x_ahuinan', 'bilibili_x_dongtuna'],
                 CXuanDie: ['bfake_zhanghua', 'bfake_hanshao', 'bfake_hanrong', 'bilibili_adong', 'bfake_jiananfeng', 'bfake_shen_zhangjiao', 'bfake_shen_zhangfei', 'bfake_shen_jiaxu', 'bfake_huanwen', 'bfake_miheng'],
             },
@@ -40,7 +40,7 @@ const packs = function () {
             bilibili_zhengxuan: ['male', 'qun', 3, ['bilibili_zhengjing'], ['character:zhengxuan', 'die:zhengxuan', 'name:郑|玄']],
             bilibili_sunhanhua: ['female', 'wu', 3, ['bilibili_chongxu', 'miaojian', 'shhlianhua'], ['character:sunhanhua', 'die:sunhanhua', 'name:孙|寒华']],
             bilibili_lonelypatients: ['male', 'key', 4, ['bilibili_meihua', 'bilibili_zhengyou'], ['clan:活动群', 'name:独孤|null']],
-            bilibili_kuangshen: ['male', 'key', '1/10/3', ['bilibili_paoku', 'bilibili_zhijiang'], ['clan:宿舍群|肘击群|活动群']],
+            bilibili_kuangshen: ['male', 'key', '110/3', [], ['clan:宿舍群|肘击群', 'unseen']],
             bilibili_shen_guojia: ['male', 'wei', '9/9/5', ['stianyi', 'resghuishi', 'bilibili_huishi'], ['doublegroup:shen:wei:wu', 'die:shen_guojia']],
             bilibili_re_xusheng: ['male', 'wu', 4, ['bilibili_pojun', 'kuangcai', 'bilibili_baodao'], ['die:re_xusheng']],
             bilibili_xushao: ['male', 'qun', 3, ['bol_pinjian', 'bol_yuedan'], ['die:xushao']],
@@ -69,6 +69,7 @@ const packs = function () {
             bilibili_zhugeliang: ['male', 'shu', 3, ['bilibili_lianbing'], ['name:诸葛|亮', 'clan:琅琊诸葛氏']],
             bilibili_shibing: ['male', 'shu', Infinity, ['bilibili_tongshuai'], ['name:null|null', 'character:haopu', 'unseen']],
             bilibili_majun: ['male', 'wei', 3, ['xinfu_jingxie', 'bilibili_qiaosi'], ['character:majun', 'die:majun', 'name:马|钧']],
+            bilibili_yunshiyiyu: ['male', 'key', 4, [], ['clan:宿舍群|肘击群|活动群', 'unseen']],
             //双面武将--正面
             bilibili_wangtao: ['female', 'shu', 3, ['huguan', 'yaopei', 'dualside'], ['dualside:bilibili_x_wangyue', 'character:wangtao', 'die:wangtao']],
             bilibili_wangyue: ['female', 'shu', 3, ['huguan', 'mingluan', 'dualside'], ['dualside:bilibili_x_wangtao', 'character:wangyue', 'tempname:wangyue', 'die:wangyue']],
@@ -133,6 +134,13 @@ const packs = function () {
             bilibili_liuguanzhang: '为对抗风系大法师丁真，三英齐聚餐厅共议对策并向丁真寄送挑战书之事。虽三英为讨伐丁真之事制定了各种不同的策略，但因丁真过于强大，最终以失败告终。',
             bilibili_yirenyixiaojian: `<a href="https://space.bilibili.com/81796729"><img style=width:160px src=${lib.assetURL}extension/活动武将/image/skin/bilibili_yirenyixiaojian/全叠建哥.jpg></a>`,
             bilibili_zhugeliang: '你拾它作甚！！！你今天拾起来，他明天还要来撒野的！！！！！！',
+            bilibili_yunshiyiyu: [
+                '“我愿意与你一同徜徉于见证我们爱意互诉的樱花树下，那天边西下的渐红的夕阳，跟我们初见时你羞涩的脸庞一样娇羞可爱。令我从此内心被你的笑意给冻住，又被你的纯爱救赎，无可自拔地爱上了你。”',
+                '“如果有一天，我们再次降临这个世上，我希望这份爱永不变质，直到生生世世！”',
+                '“我们就以今日所见，看向那远处的浪漫的夕阳做誓，来世你我再见，就一同举起樱花花瓣，望向同一处夕阳，彼方的呼唤会唤起我们此刻爱的回响。”',
+                '“我们约定好了，云哥哥。”',
+                '“嗯，约定好了，亲爱的。”',
+            ].join('<br>'),
         },
         characterFilter: {
             bilibili_sp_xuyou(mode) {
@@ -6322,11 +6330,9 @@ const packs = function () {
             bilibili_jinyan: {
                 mod: {
                     playerEnabled(card, player, target) {
-                        if (_status.currentPhase != player || target == player) return;
-                        if (player.getHistory('useCard', function (evt) {
-                            if (evt.card.name == 'qizhengxiangsheng') return false;
-                            return evt.targets && evt.targets.includes(target);
-                        }).length && card.name != 'qizhengxiangsheng') return false;
+                        if (_status.currentPhase !== player || target === player || card.name === 'qizhengxiangsheng') return;
+                        let history = player.getHistory('useCard', evt => evt.targets?.includes(target)).slice().reverse();
+                        if (history.length > 0 && history.findIndex(evt => evt.card.name == 'qizhengxiangsheng') !== 0) return false;
                     },
                 },
             },
@@ -9527,13 +9533,12 @@ const packs = function () {
                 filter(event, player) {
                     if (game.roundNumber <= 1) return false;
                     return game.hasPlayer(target => {
-                        return target != player && lib.skill.bilibili_fazhou.findTarget(target);
+                        return target !== player && lib.skill.bilibili_fazhou.findTarget(target);
                     });
                 },
-                findTarget(player, double) {
+                findTarget(player) {
                     let bool = player.getRoundHistory('useCard', () => true, 1).reduce((list, evt) => list.add(get.type2(evt.card)), []).length >= 3;
-                    let goon = player.getRoundHistory('sourceDamage', () => true, 1).reduce((sum, evt) => sum + evt.num, 0) >= 3;
-                    return double === true ? (bool && goon) : (bool || goon);
+                    return player.getRoundHistory('sourceDamage', () => true, 1).reduce((sum, evt) => sum + evt.num, 0) >= (bool ? 3 : 1);
                 },
                 async cost(event, trigger, player) {
                     event.result = await player.chooseTarget(get.prompt('bilibili_fazhou'), '对任意名角色肘成1点伤害，然后本轮将其肘出游戏', (card, player, target) => {
@@ -9545,13 +9550,12 @@ const packs = function () {
                 },
                 async content(event, trigger, player) {
                     for (const target of event.targets.sortBySeat(player)) {
-                        const manbaout = lib.skill[event.name].findTarget(target, true) && (() => {
+                        await target.damage();
+                        if (target.isIn() && (() => {
                             const list = get.nameList(target);
                             if (list.containsSome('bilibili_suixingsifeng', 'bilibili_yanjing')) return false;
                             return list.containsSome('bilibili_xizhicaikobe', 'bilibili_longjiuzhen') || Math.random() <= 0.08;
-                        })();
-                        await target.damage(manbaout ? 24 : 1);
-                        if (target.isIn()) {
+                        })()) {
                             target.chat('mamba out');
                             target.addTempSkill('bilibili_fazhou_mambaout', 'roundStart');
                             /*
@@ -9803,23 +9807,30 @@ const packs = function () {
             bilibili_zhangcai: {
                 trigger: { player: 'gainAfter', global: 'loseAsyncAfter' },
                 filter(event, player) {
+                    const storage = player.getStorage('bilibili_zhangcai_round');
                     return event.getg?.(player)?.some(card => {
                         if (!(get.owner(card) === player && get.position(card) === 'h')) return false;
-                        return _status.connectMode || player.hasUseTarget(card, false);
+                        if (player.hasUseTarget(card, false) && !storage.includes(get.suit(card))) return true;
+                        return _status.connectMode && storage.length < 4;
                     });
                 },
                 direct: true,
                 clearTime: true,
                 async content(event, trigger, player) {
                     const cards = trigger.getg(player);
-                    const result = await player.chooseToUse(function (card) {
-                        const evt = _status.event;
-                        if (!lib.filter.cardEnabled(card, evt.player, evt)) return false;
+                    const result = await player.chooseToUse(function (card, player) {
+                        const evt = get.event(), storage = player.getStorage('bilibili_zhangcai_round');
+                        if (!lib.filter.cardEnabled(card, evt.player, evt) || storage.includes(get.suit(card))) return false;
                         let cards = [card];
                         if (Array.isArray(card.cards)) cards.addArray(card.cards);
                         return cards.containsSome(...(evt.cards ?? []));
-                    }, get.prompt2(event.name)).set('addCount', false).set('cards', cards).set('logSkill', event.name).forResult();
-                    if (result.bool) {
+                    }, get.prompt2(event.name)).set('oncard', (card, source) => {
+                        const player = get.event().getParent().player;
+                        if (source !== player) return;
+                        player.addTempSkill('bilibili_zhangcai_round', 'roundStart');
+                        player.markAuto('bilibili_zhangcai_round', [get.suit(card)]);
+                    }).set('addCount', false).set('cards', cards).set('logSkill', event.name).forResult();
+                    if (result?.bool) {
                         let suits = player.getAllHistory('useCard', evt => {
                             return evt.getParent(2).name == event.name;
                         }).reduce((list, evt) => list.add(get.suit(evt.card)), []);
@@ -9842,8 +9853,15 @@ const packs = function () {
                 },
                 onremove(player, skill) {
                     player.removeTip(skill);
+                    player.removeSkill(skill);
                 },
-                derivation: ['jueman', 'oljianman', 'miniaocai', 'junkshicai'],
+                derivation: ['jueman', 'oljianman', 'aocai', 'junkshicai'],
+                subSkill: {
+                    round: {
+                        charlotte: true,
+                        onremove: true,
+                    },
+                },
             },
             //乐大小乔
             bilibili_qiqin: {
@@ -14711,7 +14729,7 @@ const packs = function () {
             old_zuoci_ab: '左慈',
             bilibili_shengxunyu: '生熏鱼',
             bilibili_jinyan: '禁言',
-            bilibili_jinyan_info: '锁定技，其他角色于你的回合内至多成为一次你使用非【奇正相生】牌的目标。',
+            bilibili_jinyan_info: '锁定技，其他角色于你的回合内至多成为一次你使用非【奇正相生】牌的目标；你使用【奇正相生】时，重置对目标角色的【禁言】限制。',
             bilibili_hehu: '呵护',
             bilibili_hehu_info: '锁定技，其他角色回合结束时，其须交给你两张牌，然后其摸两张牌并获得两张【影】（这些牌不计入手牌上限且不能对你使用）。',
             bilibili_yutai: '彧态',
@@ -14853,11 +14871,11 @@ const packs = function () {
             bilibili_xiezhi: '协治',
             bilibili_xiezhi_info: '其他角色的回合开始时，你可以为其本回合基本牌、锦囊牌、装备、武将技能的最大使用次数任意分配数值，每个数值至少为2，且数值之和须为10。',
             bilibili_fazhou: '罚肘',
-            bilibili_fazhou_info: '每轮开始时，你可以选择任意名上一轮使用过三种类别的牌或造成过至少3点伤害的其他角色，对这些角色依次肘成1点伤害，然后本轮将这些角色肘出游戏（同时满足两项条件的角色有8%几率改为肘成24点伤害）。',
+            bilibili_fazhou_info: '每轮开始时，你可以选择任意名上一轮造成过至少3点伤害的其他角色（若其使用过三种类别的牌，则改为上一轮造成过伤害），对这些角色依次肘成1点伤害且有8%几率于本轮将其肘出游戏。',
             bilibili_fazhou_append: '<span style="font-family:yuanli">不顺群意者，当填黑屋之壑<br>吾令不从者，当膏肘击之锷</span>',
             bilibili_xizhicaikobe: '戏志才',
             bilibili_zhangcai: '彰才',
-            bilibili_zhangcai_info: '当你获得牌后，你可以使用其中一张牌，然后根据你本局游戏以此法使用过的花色数视为拥有对应技能：≥1，〖蟨蛮〗；≥2，〖鹣蛮〗；≥3，〖傲才〗；≥4，〖恃才〗。',
+            bilibili_zhangcai_info: '每轮每种花色限一次，当你获得牌后，你可以使用其中一张牌，然后根据你本局游戏以此法使用过的花色数视为拥有对应技能：≥1，〖蟨蛮〗；≥2，〖鹣蛮〗；≥3，〖傲才〗；≥4，〖恃才〗。',
             bilibili_laosao: '牢骚',
             bilibili_laosao_info: `锁定技。你视为装备着${get.poptip('bilibili_laosaozhipao')}。游戏开始时或牌堆洗牌后，你将${get.poptip('bilibili_laosaozhipao')}置入装备区。`,
             bilibili_laosaozhipao: '牢骚之袍',
@@ -15075,6 +15093,8 @@ const packs = function () {
             bilibili_majun_ab: '水转百戏',
             bilibili_qiaosi: '巧思',
             bilibili_qiaosi_info: '出牌阶段限一次，你可以表演水转百戏图，若表演成功，你获得对应的卡牌，然后选择一项：①将等量张牌交给一名其他角色；②弃置等量张牌。',
+            bilibili_yunshiyiyu: '云时亦雨',
+            bilibili_append: '<span style="font-family:yuanli">啊啊啊啊啊牢萌我阿米诺斯</span>',
         },
     };
     for (const i in huodongcharacter.character) {

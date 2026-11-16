@@ -7713,6 +7713,10 @@
             "size": 119933
         },
         {
+            "path": "image/character/bilibili_yunshiyiyu.jpg",
+            "size": 117844
+        },
+        {
             "path": "image/character/bilibili_zhangrang.jpg",
             "size": 65455
         },
@@ -9409,6 +9413,18 @@
             "size": 46322
         },
         {
+            "path": "image/skin/bilibili_yunshiyiyu/云时亦雨·真身.jpg",
+            "size": 124322
+        },
+        {
+            "path": "image/skin/bilibili_yunshiyiyu/农太公.png",
+            "size": 1118673
+        },
+        {
+            "path": "image/skin/bilibili_yunshiyiyu/瑶太公.png",
+            "size": 492797
+        },
+        {
             "path": "js/config.js",
             "size": 26287
         },
@@ -9470,7 +9486,7 @@
         },
         {
             "path": "js/precontent/huodongcharacter.js",
-            "size": 926189
+            "size": 928013
         },
         {
             "path": "js/precontent/index.js",
