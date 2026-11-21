@@ -50937,7 +50937,7 @@ const packs = function () {
             Myin_yuji: '隐于吉',
             Myin_jiaxu: '隐贾诩',
             miniyinyinxing: '隐姓',
-            miniyinyinxing_info: `锁定技。①当你需要使用或打出牌时，你只能使用或打出虚拟牌或转化，且你可以将任意张手牌按以下规则使用或打出：1.${get.poptip({
+            miniyinyinxing_info: `锁定技。①当你需要使用或打出牌时，你只能使用或打出虚拟牌或转化牌，且你可以将任意张手牌按以下规则使用或打出：1.${get.poptip({
                 id: 'miniyinyinxing_duizi',
                 name: '对子',
                 info: '两张点数相同的牌',

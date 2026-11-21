@@ -16908,37 +16908,44 @@ const packs = function () {
                 audio: 'ext:活动武将/audio/skill:2',
                 trigger: { global: ['loseAfter', 'equipAfter', 'addJudgeAfter', 'gainAfter', 'loseAsyncAfter', 'addToExpansionAfter'] },
                 getIndex(event, player) {
-                    if (!event.isPhaseUsing(player)) return false;
+                    if (player != _status.currentPhase) return false;
                     return game.filterPlayer(current => {
                         if (!event.getl?.(current)?.hs?.length) return false;
+                        if (!player.getFriends().includes(current)) return false;
                         const colors = event.getl(current).hs.map(card => get.color(card)).toUniqued();
                         return colors.some(color => !current.hasCard(card => get.color(card, player) == color, 'h'))
                     }).sortBySeat();
                 },
                 filter(event, player, name, target) {
-                    if (player.hasMark('wechatgaogai_used')) return false;
                     return target?.isIn() && target.countCards('h') < player.maxHp;
                 },
                 logTarget: (event, player, name, target) => target,
                 check: (event, player, name, target) => get.effect(target, { name: 'draw' }, player, player) > 0,
                 forced: true,
+                usable: 2,
                 async content(event, trigger, player) {
-                    player.addTempSkill(event.name + '_used');
-                    player.addMark(event.name + '_used', 1, false);
                     const [target] = event.targets;
+                    target.addExpose(0.2);
                     await target.drawTo(player.maxHp);
                     const colors = trigger.getl(target).hs.map(card => get.color(card)).toUniqued();
                     if (colors.some(color => {
                         return game.hasPlayer(current => game.hasPlayer(currentx => Object.keys(current.storage).some(skill => skill.startsWith(`wechatluntian_${currentx.playerid}_${color}`))))
                     })) await player.draw(2);
                 },
-                subSkill: { used: { charlotte: true, onremove: true } }
             },
             wechatluntian: {
                 init(player, skill) {
                     Object.keys(lib.color).forEach(color => {
                         if (!lib.skill[`${skill}_${player.playerid}_${color}`]) {
                             lib.skill[`${skill}_${player.playerid}_${color}`] = {
+                                mod: {
+                                    cardEnabled(card, player) {
+                                        if (card.name != 'sha') return;
+                                        const color = get.color(card);
+                                        if (color == 'unsure' || !card.cards?.length) return true;
+                                        if (!game.hasPlayer(current => Object.keys(player.storage).some(skill => skill.startsWith(`wechatluntian_${current.playerid}_${color}`)))) return false;
+                                    },
+                                },
                                 charlotte: true,
                                 onremove(player, skill) {
                                     delete player.storage[skill];
@@ -25478,9 +25485,9 @@ const packs = function () {
             wechatcipi_info: '每回合限一次，当你摸牌阶段外获得牌或者使用【酒】时，你可以将获得的牌置入弃牌堆或者令此牌无效，然后令一名其他角色摸两张牌。',
             wechat_zhiyin_qinmi: '极秦宓',
             wechatgaogai: '高概',
-            wechatgaogai_info: `锁定技。出牌阶段限一次，一名角色失去一种颜色的所有手牌后，你令其将手牌摸至X（X为你的体力上限），然后若场上有角色拥有与其中一种颜色的“天”标记，你摸两张牌。`,
+            wechatgaogai_info: `锁定技。你的回合内内限两次，同阵营角色失去一种颜色的所有手牌后，你令其将手牌摸至X（X为你的体力上限），然后若场上有角色拥有与其中一种颜色的“天”标记，你摸两张牌。`,
             wechatluntian: '论天',
-            wechatluntian_info: '①摸牌阶段结束时，你可以与至多四名其他角色各弃置一张牌，然后你判定。因此弃置与判定结果颜色相同的牌角色获得与此牌颜色的“天”标记直到你的下回合开始。②一名角色使用【杀】时，若其拥有与此牌颜色相同的“天”标记，此【杀】不可被响应。',
+            wechatluntian_info: '①摸牌阶段结束时，你可以与至多四名其他角色各弃置一张牌，然后你判定。因此弃置与判定结果颜色相同的牌角色获得与此牌颜色的“天”标记直到你的下回合开始。②拥有“天”标记的角色只能使用与其“天”标记相同颜色的【杀】或虚拟【杀】，且其使用与其“天”标记相同颜色【杀】不可被响应。',
             wechatjuejian: '决谏',
             wechatjuejian_info: '当你成为【杀】的目标后，你可以令此【杀】无效，然后你选择一项：1.若你的“决谏”标记数小于2，你获得1枚“决谏”标记且你下回合的摸牌阶段摸牌数-X（X为你的“决谏”标记数）；2.失去此技能。',
             wechat_zhiyin_pangtong: '极庞统',
