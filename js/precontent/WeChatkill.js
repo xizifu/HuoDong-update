@@ -174,7 +174,7 @@ const packs = function () {
             wechat_sp_zhugeliang: ['male', 'shu', 3, ['wechathuoji', 'wechatkanpo'], ['name:诸葛|亮', 'clan:琅琊诸葛氏']],
             wechat_yj_weiyan: ['male', 'qun', 4, ['wechatguli', 'wechataosi']],
             wechat_ganfuren: ['female', 'shu', 3, ['dcshushen', 'wechatshenzhi'], ['name:甘|null']],
-            wechat_huojun: ['male', 'shu', 4, ['twsidai', 'jieyu']],
+            wechat_huojun: ['male', 'shu', 4, ['wechatsidai', 'jieyu']],
             wechat_yj_xuhuang: ['male', 'qun', 4, ['wechatxhzhiyan', 'wechatjiewei']],
             wechat_yj_ganning: ['male', 'qun', 4, ['wechatjinfan', 'wechatsheque']],
             wechat_sunluyu: ['female', 'wu', 3, ['wechatmeibu', 'wechatmumu']],
@@ -24393,6 +24393,138 @@ const packs = function () {
                     else await target.draw(player.hujia);
                 },
             },
+            // 霍峻
+            wechatsidai: {
+                audio: 'wechatsidai',
+                mod: {
+                    cardUsable(card) {
+                        if (card.storage?.wechatsidai) return Infinity;
+                    },
+                    targetInRange(card) {
+                        if (card.storage?.wechatsidai) return true;
+                    },
+                },
+                locked: false,
+                limited: true,
+                enable: 'phaseUse',
+                skillAnimation: true,
+                animationColor: 'fire',
+                filter(event, player) {
+                    const cards = player.getCards('h', { type: 'basic' });
+                    if (!cards.length) return false;
+                    if (cards.some(card => !game.checkMod(card, player, 'unchanged', 'cardEnabled2', player))) return false;
+                    return event.filterCard(get.autoViewAs({ name: 'sha' }, 'unsure'), player, event) || lib.inpile_nature.some(nature => event.filterCard(get.autoViewAs({ name: 'sha', nature }, 'unsure'), player, event));
+                },
+                chooseButton: {
+                    dialog(event, player) {
+                        const list = lib.inpile_nature.slice(0);
+                        list.unshift(null);
+                        const vcards = list.filter(nature => event.filterCard(get.autoViewAs({ name: 'sha', nature }, 'unsure'), player, event)).map(nature => {
+                            return ['基本', '', 'sha', nature];
+                        });
+                        const dialog = ui.create.dialog('伺怠', [vcards, 'vcard'], 'hidden');
+                        dialog.direct = true;
+                        return dialog;
+                    },
+                    check(button) {
+                        const player = _status.event.player;
+                        const card = { name: button.link[2], nature: button.link[3] };
+                        if (_status.event.getParent().type === 'phase' && game.hasPlayer(current => {
+                            return player.canUse(card, current) && get.effect(current, card, player, player) > 0;
+                        })) {
+                            switch (button.link[2]) {
+                                case 'sha':
+                                    if (button.link[3] === 'fire') {
+                                        return 2.95;
+                                    } else if (button.link[3] === 'thunder' || button.link[3] === 'ice') {
+                                        return 2.92;
+                                    } else {
+                                        return 2.9;
+                                    }
+                            }
+                        }
+                        return 1 + Math.random();
+                    },
+                    backup(links, player) {
+                        return {
+                            audio: 'wechatsidai',
+                            filterCard: { type: 'basic' },
+                            selectCard: -1,
+                            check(card) {
+                                return 6 - get.value(card);
+                            },
+                            viewAs: { name: links[0][2], nature: links[0][3], storage: { wechatsidai: true } },
+                            position: 'h',
+                            check: () => 1,
+                            popname: true,
+                            log: false,
+                            async precontent(event, trigger, player) {
+                                player.logSkill('wechatsidai');
+                                player.awakenSkill('wechatsidai');
+                                player.addTempSkill('wechatsidai_effect');
+                                event.getParent().addCount = false;
+                            },
+                        };
+                    },
+                    prompt(links, player) {
+                        return `将手牌区内的所有基本牌当${get.translation(links[0][3] || '')}【${get.translation(links[0][2])}】使用`;
+                    },
+                },
+                ai: {
+                    order(item, player) {
+                        let max = 0;
+                        if (lib.inpile_nature.some(i => player.getUseValue({ name: 'sha', nature: i }) > 0)) {
+                            const temp = get.order({ name: 'sha' });
+                            if (temp > max) max = temp;
+                        }
+                        if (max > 0) max += 0.3;
+                        return max;
+                    },
+                    result: { player: 1 },
+                },
+                subSkill: {
+                    effect: {
+                        charlotte: true,
+                        trigger: { source: 'damageBegin1' },
+                        filter(event, player) {
+                            if (!event.card?.storage?.wechatsidai || event.getParent().type !== 'card') return false;
+                            return event.cards.some(card => card.name === 'jiu');
+                        },
+                        forced: true,
+                        popup: false,
+                        async content(event, trigger, player) {
+                            trigger.num *= 2;
+                            game.log(trigger.card, '的伤害值', '#y×2');
+                        },
+                        group: ['wechatsidai_tao', 'wechatsidai_shan'],
+                    },
+                    tao: {
+                        trigger: { source: 'damageSource' },
+                        filter(event, player) {
+                            if (!event.card?.storage?.wechatsidai || !event.player.isIn()) return false;
+                            return event.cards.some(card => card.name === 'tao');
+                        },
+                        forced: true,
+                        popup: false,
+                        async content(event, trigger, player) {
+                            trigger.player.loseMaxHp();
+                        },
+                    },
+                    shan: {
+                        trigger: { player: 'useCard' },
+                        filter(event, player) {
+                            if (!event.card?.storage?.wechatsidai) return false;
+                            return event.cards.some(card => card.name === 'shan');
+                        },
+                        forced: true,
+                        popup: false,
+                        async content(event, trigger, player) {
+                            game.log(trigger.card, '不可被响应');
+                            trigger.directHit.addArray(game.filterPlayer());
+                        },
+                    }
+                }
+            },
         },
         dynamicTranslate: {
             wechatxiangzhi(player) {
@@ -25780,6 +25912,8 @@ const packs = function () {
             wechatsbjushou_info: '①出牌阶段限一次。若你的武将牌正面朝上，你可以弃置至多两张牌，然后你翻面并获得等量护甲（你每因此弃置了一张武器牌则额外获得1点护甲）。②当你受到伤害后，若你的武将牌背面朝上，你可以选择一项：1.翻面；2.获得1点护甲。③你的手牌上限+X（X为你的护甲数）。',
             wechatsbjiewei: '解围',
             wechatsbjiewei_info: '当你翻面时，你可以失去1点护甲并选择一名角色。然后你选择一项：1.你观看其手牌并获得其区域内的一张牌；2.令其摸X张牌（X为你的护甲数）。',
+            wechatsidai: '伺怠',
+            wechatsidai_info: '限定技。出牌阶段，你可以将手牌区内的所有基本牌当做任意【杀】使用（无距离和次数限制）。若此牌对应的实体牌中：包含【闪】，则此牌不可被响应；包含【桃】，则当目标角色受到此牌的伤害后，其减1点体力上限；包含【酒】，则当目标角色受到此牌的伤害时，此伤害×2。。',
 
             // ----------------------- 台词部分 ----------------------- //
             '#ext:活动武将/audio/skill/wechatzhongxin1': '苍生之愿，即贫道所愿也。',
