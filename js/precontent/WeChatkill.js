@@ -60,7 +60,7 @@ const packs = function () {
                 wechat_zhiyin_zhi: ['luxun', 'xunyou', 'jiaxu', 'wangyi', 'jiangwei', 'xunyu', 'lusu', 'guojia', 'zhugeliang', 'zhouyu'].map(i => `wechat_zhiyin_${i}`),
                 wechat_zhiyin_quan: ['caorui', 'sunquan', 'simayi', 'yuanshu', 'zhugeke', 'guohuanghou', 'caopi', 'dongzhuo', 'hetaihou', 'liubei', 'yuanshao', 'caocao'].map(i => `wechat_zhiyin_${i}`),
                 wechat_zhiyin_cai: ['qinmi', 'caiwenji', 'huangyueying', 'xiaoqiao', 'bulianshi', 'diaochan', 'xinxianying', 'kongrong', 'zhangchunhua', 'caozhi', 'zhenji', 'daqiao'].map(i => `wechat_zhiyin_${i}`),
-                wechat_zhiyin: ['simazhao', 'wangyuanji', 'lvmeng', 'pangtong', 'zhaoe'].map(i => `wechat_zhiyin_${i}`),
+                wechat_zhiyin: ['chengong', 'simazhao', 'wangyuanji', 'lvmeng', 'pangtong', 'zhaoe'].map(i => `wechat_zhiyin_${i}`),
                 wechat_zhi_sui: ['zhushixing', 'xushi', 'sunquan'].map(i => `wechat_zhi_${i}`),
                 wechat_zhi_bei: ['caojie', 'caocao'].map(i => `wechat_zhi_${i}`),
                 wechat_zhi_han: ['fuhuanghou', 'zhangjiao'].map(i => `wechat_zhi_${i}`),
@@ -269,6 +269,7 @@ const packs = function () {
             wechat_zhiyin_zhaoe: ['female', 'qun', 3, ['wechatqianren', 'wechatjueshi', 'wechatxuechou']],
             wechat_zhiyin_simazhao: ['male', 'wei', 4, ['wechatzhaowei', 'wechatdengji'], ['name:司马|昭', 'border:jin']],
             wechat_zhiyin_wangyuanji: ['female', 'wei', 3, ['wechatshuwen', 'wechatsujian'], ['border:jin']],
+            wechat_zhiyin_chengong: ['male', 'qun', 3, ['wechatzhaoshi', 'wechatjueju']],
             //谋攻
             wechat_sb_sunshangxiang: ['female', 'shu', 3, ['wechatsbliangzhu', 'wechatsbjieyin'], ['border:wu']],
             wechat_sb_zhaoyun: ['male', 'shu', 4, ['wechatsblongdan', 'wechatsbjizhu']],
@@ -16344,7 +16345,7 @@ const packs = function () {
                             choiceList.map(item => [item, prompt[item]]),
                             'textbutton',
                         ],
-                    ], true).set('fiterButton', button => {
+                    ], true).set('filterButton', button => {
                         const { choiceList, list } = get.event();
                         const { link } = button;
                         if (link == 'qianggong' && (!list.length || (choiceList?.length == 2 && choiceList.includes('qianggong')))) return false;
@@ -24922,6 +24923,208 @@ const packs = function () {
                     result: { player: 1 }
                 }
             },
+            // 极陈宫
+            wechatzhaoshi: {
+                audio: 'ext:活动武将/audio/skill:2',
+                enable: 'phaseUse',
+                filter(event, player) {
+                    const storage = player.getStorage('wechatzhaoshi_used');
+                    const bool1 = !storage.includes('give') && game.hasPlayer(current => current != player) && player.hasCards('h');
+                    const bool2 = !storage.includes('gain') && game.hasPlayer(current => game.hasPlayer(currentx => currentx != current && currentx.hasCards('h')));
+                    return bool1 || bool2;
+                },
+                chooseButton: {
+                    dialog(event, player) {
+                        const dialog = ui.create.dialog(
+                            `肇势：你可以选择一项`,
+                            [
+                                [
+                                    ['give', '交给一名其他角色一张手牌'],
+                                    ['gain', '令一名角色获得另一名角色一张手牌']
+                                ],
+                                'textbutton'
+                            ],
+                            'hidden'
+                        );
+                        dialog.direct = true;
+                        return dialog;
+                    },
+                    filter(button, player) {
+                        const link = button.link;
+                        if (player.getStorage('wechatzhaoshi_used').includes(link)) return false;
+                        if (button.link === 'give') return game.hasPlayer(current => current != player) && player.hasCards('h');
+                        return game.hasPlayer(current => game.hasPlayer(currentx => currentx != current && currentx.hasCards('h')));
+                    },
+                    check(button) {
+                        const player = get.player();
+                        const link = button.link;
+                        if (link === 'give' && game.hasPlayer(current => current != player && get.attitude(player, current) > 0)) return 1;
+                        if (link === 'gain' && game.hasPlayer(current => game.hasPlayer(currentx => currentx != current && currentx.hasCards('h') && get.effect(currentx, { name: 'shunshou_copy', position: 'h' }, current, player)))) return 2;
+                        return 0;
+                    },
+                    backup(links, player) {
+                        return get.copy(lib.skill[`wechatzhaoshi_${links[0]}`]);
+                    },
+                    prompt(links, player) {
+                        return `###肇势###${lib.skill[`wechatzhaoshi_${links[0]}`].prompt()}`;
+                    },
+                },
+                ai: {
+                    oder(item, player) {
+                        if (!player.getStorage('wechatzhaoshi_used').includes('give') && game.hasPlayer(current => current != player && get.attitude(player, current) > 0)) return 10;
+                        if (!player.getStorage('wechatzhaoshi_used').includes('gain') && game.hasPlayer(current => game.hasPlayer(currentx => currentx != current && currentx.hasCards('h') && get.effect(currentx, { name: 'shunshou_copy', position: 'h' }, current, player)))) return 10;
+                        return 1;
+                    },
+                    result: { player: 1 }
+                },
+                subSkill: {
+                    used: {
+                        charlotte: true,
+                        onremove: true,
+                    },
+                    backup: {},
+                    give: {
+                        audio: 'wechatzhaoshi',
+                        filterCard: true,
+                        position: 'h',
+                        filterTarget: lib.filter.notMe,
+                        discard: false,
+                        lose: false,
+                        delay: false,
+                        prompt() {
+                            return `你可以交给一名其他角色一张手牌，若此牌为其手牌中点数最大的牌，则其可以将此牌当【杀】使用。`;
+                        },
+                        ai1(card) {
+                            return 6.5 - get.value(card);
+                        },
+                        ai2(target) {
+                            const player = get.player();
+                            return get.attitude(player, target);
+                        },
+                        async content(event, trigger, player) {
+                            player.addTempSkill('wechatzhaoshi_used', 'phaseUseAfter');
+                            player.markAuto('wechatzhaoshi_used', ['give']);
+                            const { cards, target } = event;
+                            await player.give(cards, target);
+                            const min = Math.min(...[target.getCards('h').map(card => get.number(card))]);
+                            if (get.number(cards[0]) == min && target.getCards('h').includes(cards[0])) {
+                                target.addGaintag(cards, 'wechatzhaoshi');
+                                target.addSkill('wechatzhaoshi_sha');
+                            }
+                        },
+                        ai: { result: { target: 1 } },
+                    },
+                    gain: {
+                        audio: 'wechatzhaoshi',
+                        filterTarget(card, player, target) {
+                            if (!ui.selected.targets.length) return game.hasPlayer(current => current != target && current.hasCards('h'));
+                            return true;
+                        },
+                        selectTarget: 2,
+                        multitarget: true,
+                        targetprompt: ['拿牌', '被拿牌'],
+                        prompt() {
+                            return `你可以令一名角色获得另一名角色一张手牌，若此牌为其后者手牌中点数最大的牌，则前者可以将此牌当【杀】使用。`;
+                        },
+                        ai1: (card) => 1,
+                        ai2(target) {
+                            const player = get.player();
+                            if (!ui.selected.targets.length) return get.attitude(player, target);
+                            return -1;
+                        },
+                        async content(event, trigger, player) {
+                            player.addTempSkill('wechatzhaoshi_used', 'phaseUseAfter');
+                            player.markAuto('wechatzhaoshi_used', ['gain']);
+                            const [target1, target2] = event.targets;
+                            const result = await target1.gainPlayerCard(target2, 'h', true).forResult();
+                            if (result?.bool) {
+                                const card = result.cards[0];
+                                const min = Math.min(...[target2.getCards('h').concat([card]).map(card => get.number(card))]);
+                                if (get.number(card) == min && target1.getCards('h').includes(card)) {
+                                    target1.addGaintag(card, 'wechatzhaoshi');
+                                    target1.addSkill('wechatzhaoshi_sha');
+                                }
+                            }
+                        },
+                    },
+                    sha: {
+                        enable: "chooseToUse",
+                        viewAsFilter(player) {
+                            return player.hasCards('h', card => card.hasGaintag('wechatzhaoshi'));
+                        },
+                        filterCard(card, player) {
+                            return card.hasGaintag('wechatzhaoshi');
+                        },
+                        position: 'h',
+                        viewAs: { name: 'sha' },
+                        check(card) {
+                            return 6.5 - get.value(card);
+                        },
+                        prompt: '将一张“肇势”牌当【杀】使用',
+                    }
+                }
+            },
+            wechatjueju: {
+                audio: 'ext:活动武将/audio/skill:2',
+                trigger: { player: 'dying' },
+                filter(event, player) {
+                    return game.hasPlayer(current => current != player && current.hasCards('h'));
+                },
+                async cost(event, trigger, player) {
+                    event.result = await player.chooseTarget(get.prompt2(event.skill), (card, player, target) => {
+                        return target != player && target.hasCards('h');
+                    }).set('ai', target => {
+                        const { player } = get.event();
+                        return -get.attitude(player, target);
+                    }).forResult();
+                },
+                async content(event, trigger, player) {
+                    const target = event.targets[0];
+                    if (!target.hasCards('h')) return;
+                    let result = await player.choosePlayerCard(target, 'h', 'visible', [0, 1], true, '绝裾：你可以分配其中至多一张红色牌').set('filterButton', button => {
+                        return get.color(button.link) == 'red';
+                    }).set('ai', button => {
+                        const player = get.player();
+                        const card = button.link;
+                        if (['tao', 'jiu'].includes(card.name)) return 10;
+                        if (player.countCards('hs', card => player.canSaveCard(card, player)) >= 1 - player.hp) return get.value(card);
+                        return 0;
+                    }).forResult();
+                    if (result?.links?.length) {
+                        const gives = result.links;
+                        const targets = game.filterPlayer(current => current != target);
+                        result = targets.length === 1 ? { bool: true, targets } : await player.chooseTarget(`选择获得${get.translation(gives)}的角色`, true, (card, player, target) => {
+                            return get.event().targets?.includes(target);
+                        }).set('targets', targets).set('ai', target => {
+                            const { player, goon } = get.event();
+                            let att = get.attitude(player, target);
+                            if (att < 3) return 0;
+                            if (tareget.hasSkillTag('nogain')) att /= 10;
+                            if (goon && player == tareget) att *= 114514;
+                            return att;
+                        }).set('goon', ['tao', 'jiu'].includes(gives[0].name)).forResult();
+                        if (result?.bool) {
+                            await result.targets[0].gain(gives, target, 'give').set('giver', player);
+                            game.filterPlayer(current => current != player).forEach(current => {
+                                current.addTempSkill(event.name + '_effect');
+                                current.markAuto(event.name + '_effect', [player]);
+                            });
+                        }
+                    }
+                },
+                subSkill: {
+                    effect: {
+                        charlotte: true,
+                        onremove: true,
+                        intro: { content: '本回合不能对$使用【桃】' },
+                        mod: {
+                            cardSavable(card, player, target) {
+                                if (card.name == 'tao' && target != player && player.getStorage('wechatjueju_effect')) return false;
+                            },
+                        },
+                    }
+                }
+            },
         },
         dynamicTranslate: {
             wechatxiangzhi(player) {
@@ -26335,6 +26538,11 @@ const packs = function () {
             wechatshuwen_info: `${get.poptip('rule_yunlvSkill')}。每回合限一次，当你失去手牌中或装备区中的非锦囊牌，你可以：<br>平：获得两张手牌中未拥有花色的牌；<br>仄：令一名其他角色交给你一张牌。<br>转韵：你使用一张锦囊牌结算结束后（每回合每种花色限一次）。`,
             wechatsujian: '素简',
             wechatsujian_info: '出牌阶段限一次，你可以保留手牌每个花色各一张，然后将其余牌弃置或交给一名角色。若此次因此弃置的牌数或交出的牌数与保留的花色数相同，则你摸X张牌（X为你保留的花色数）。',
+            wechat_zhiyin_chengong: '极陈宫',
+            wechatzhaoshi: '肇势',
+            wechatzhaoshi_info: `出牌阶段各限一次，你可以：1.交给一名其他角色一张手牌，若此牌为其手牌中点数最大的牌，则其可以将此牌当【杀】使用；2.令一名角色获得另一名角色一张手牌，若此牌为其后者手牌中点数最大的牌，则前者可以将此牌当【杀】使用。`,
+            wechatjueju: '绝裾',
+            wechatjueju_info: '每轮限一次，当你进入濒死时，你可以观看一名其他角色的手牌并分配其中至多一张红色牌。若如此做，本回合其他角色不能对你使用【桃】。',
 
             // ----------------------- 台词部分 ----------------------- //
             '#ext:活动武将/audio/skill/wechatzhongxin1': '苍生之愿，即贫道所愿也。',
