@@ -64,7 +64,7 @@ const packs = function () {
                 wechat_zhi_sui: ['zhushixing', 'xushi', 'sunquan'].map(i => `wechat_zhi_${i}`),
                 wechat_zhi_bei: ['caojie', 'caocao'].map(i => `wechat_zhi_${i}`),
                 wechat_zhi_han: ['fuhuanghou', 'zhangjiao'].map(i => `wechat_zhi_${i}`),
-                wechat_zhi: ['liubiao', 'caozhi', 'old_yuanshu', 'caopi', 'liubei', 'yuanshu', 'yanghu', 'jiaxu'].map(i => `wechat_zhi_${i}`),
+                wechat_zhi: ['zhenji', 'xiahouhui', 'liubiao', 'caozhi', 'old_yuanshu', 'caopi', 'liubei', 'yuanshu', 'yanghu', 'jiaxu'].map(i => `wechat_zhi_${i}`),
                 wechat_shengzhiyifa: ['shuxueyazhouren', 'yuwenyuejuanren', 'baixiang', 'hema', 'gaoluji', 'mashe', 'yingjiang', 'yuehanniu', 'luotuo', 'hansimao', 'dihuangxia', 'yanlongxia', 'nailong'].map(i => `wechat_${i}`),//任何答辩，终将绳之以法！！！！！
             },
         },
@@ -311,6 +311,7 @@ const packs = function () {
             wechat_zhi_yanghu: ['male', 'wei', 4, ['wechatsuigong', 'wechatyuansi', 'wechatyilve']],
             wechat_zhi_jiaxu: ['male', 'qun', 3, ['wechatruping', 'wechatjueyi']],
             wechat_zhi_xiahouhui: ['female', 'wei', 3, ['wechatjieqing', 'wechatxhhxiangzhi', 'wechatzheyuan'], ['name:夏侯|徽']],
+            wechat_zhi_zhenji: ['female', 'wei', 3, ['wechatyishuang', 'wechatsanzui', 'wechatfuyu'], ['name:甄|宓', 'unseen']],
             //限时武将
             wechat_nailong: ['male', 'qun', 4, ['wechatdunshi', 'wechattanchi']],
             wechat_mashe: ['male', 'qun', 4, ['wechatgenggeng', 'wechattanpai']],
@@ -25048,7 +25049,7 @@ const packs = function () {
                         },
                     },
                     sha: {
-                        enable: "chooseToUse",
+                        enable: 'chooseToUse',
                         viewAsFilter(player) {
                             return player.hasCards('h', card => card.hasGaintag('wechatzhaoshi'));
                         },
@@ -25124,6 +25125,269 @@ const packs = function () {
                         },
                     }
                 }
+            },
+            // 志
+            wechatyishuang: {
+                audio: 'ext:活动武将/audio/skill:2',
+                trigger: { player: 'phaseJieshuBegin' },
+                async cost(event, trigger, player) {
+                    event.result = await player.chooseTarget(get.prompt2(event.skill), (card, player, target) => {
+                        return get.hpColor(target) == get.hpColor(player);
+                    }, [1, Infinity]).set('ai', target => {
+                        const player = get.player();
+                        return get.effect(target, { name: 'losehp' }, player, player);
+                    }).forResult();
+                },
+                async content(event, trigger, player) {
+                    for (const target of event.targets.sortBySeat()) await target.loseHp();
+                }
+            },
+            wechatsanzui: {
+                audio: 'ext:活动武将/audio/skill:2',
+                enable: 'phaseUse',
+                filter(event, player) {
+                    return [1, 2, 3].filter(num => !player.getStorage('wechatsanzui').includes(num) && player.getHp() !== num);
+                },
+                usable: 1,
+                chooseButton: {
+                    dialog(event, player) {
+                        const list = [1, 2, 3].map(num => [num, '将体力值调整至' + num]);
+                        const dialog = ui.create.dialog(`三醉：你可以…`, [list, 'textbutton'], 'hidden');
+                        dialog.direct = true;
+                        return dialog;
+                    },
+                    filter(button, player) {
+                        const num = button.link;
+                        return !player.getStorage('wechatsanzui').includes(num) && player.getHp() !== num;
+                    },
+                    check(button) {
+                        const player = get.player();
+                        const link = button.link;
+                        const hp = player.getHp();
+                        if (link == 1) return (hp < 1 || hp == 2) ? 1 : 0;
+                        else if (link == 2) return (hp < 2 || hp == 3) ? 1.5 : 0;
+                        return (hp < 3 || hp == 4) ? 2 : 0;
+                    },
+                    backup(links, player) {
+                        const backup = get.copy(lib.skill['wechatsanzui_backup']);
+                        backup.link = links[0];
+                        return backup;
+                    },
+                    prompt(links, player) {
+                        const link = links[0];
+                        return `###三醉###你可以将体力值调整至${link}}`;
+                    },
+                },
+                ai: {
+                    order(item, player) {
+                        const hp = player.getHp();
+                        if ([1, 2, 3].some(num => {
+                            if (player.getStorage('wechatsanzui').includes(num) || player.getHp() == num) return false;
+                            if (num == 1) return (hp < 1 || hp == 2);
+                            else if (num == 2) return (hp < 2 || hp == 3);
+                            return (hp < 3 || hp == 4);
+                        })) return 7.1;
+                        return 0.1;
+                    },
+                    result: { player: 1 },
+                },
+                onremove: true,
+                intro: { content: '本局【三醉】已选择数字：$' },
+                colors: {
+                    green: {
+                        intro: '摸三张牌',
+                        filter: () => true,
+                        ai_effect(player) {
+                            return get.effect(player, { name: 'draw' }, player, player) * 3;
+                        },
+                        async content(player) {
+                            player.addTempSkill('wechatsanzui_record');
+                            player.markAuto('wechatsanzui_record', ['green']);
+                            await player.draw(3);
+                        },
+                    },
+                    yellow: {
+                        intro: '视为使用一张手牌中的基本牌或普通锦囊牌（无次数限制）',
+                        filter(player) {
+                            return player.hasCards('h', card => card => ['basic', 'trick'].includes(get.type(card)) && player.hasValueTarget(card, null, false));
+                        },
+                        ai_effect(player) {
+                            return player.hasCards('h', card => card => ['basic', 'trick'].includes(get.type(card)) && player.hasValueTarget(card, null, false));
+                        },
+                        async content(player) {
+                            player.addTempSkill('wechatsanzui_record');
+                            player.markAuto('wechatsanzui_record', ['yellow']);
+                            const vcards = player.getCards('h', card => ['basic', 'trick'].includes(get.type(card)) && player.hasUseTarget(card, null, false)).map(card => [get.type(card), '', get.name(card), get.nature(card)]);
+                            if (!vcards.length) return;
+                            const result = await player.chooseButton(['三醉：请选择你要视为使用的牌', [vcards, 'vcard']]).set('ai', button => {
+                                const player = get.player();
+                                const card = { name: button.link[2], nature: button.link[3] };
+                                return player.getUseValue(card);
+                            }, true).set('direct', true).forResult();
+                            if (result?.bool) {
+                                const card = { name: result.links[0][2], isCard: true, nature: result.links[0][3] };
+                                await player.chooseUseTarget(card, false);
+                            }
+                        },
+                    },
+                    red: {
+                        intro: '令当前手牌中的【杀】不计入手牌上限且可以当作【杀】或【闪】使用',
+                        filter(player) {
+                            return player.hasCards('h', card => get.name(card) == 'sha');
+                        },
+                        ai_effect(player) {
+                            return player.countCards('h', card => get.name(card) == 'sha').length;
+                        },
+                        async content(player) {
+                            player.addTempSkill('wechatsanzui_record');
+                            player.markAuto('wechatsanzui_record', ['red']);
+                            const shas = player.getCards('h', card => get.name(card) == 'sha');
+                            if (shas.length) {
+                                player.addGaintag(shas, 'wechatsanzui');
+                                player.addSkill('wechatsanzui_effect');
+                            }
+                        },
+                    },
+                },
+                group: 'wechatsanzui_damage',
+                subSkill: {
+                    damage: {
+                        audio: 'wechatsanzui',
+                        trigger: { player: 'damageEnd' },
+                        filter(event, player) {
+                            return [1, 2, 3].filter(num => !player.getStorage('wechatsanzui').includes(num) && player.getHp() !== num);
+                        },
+                        direct: true,
+                        async content(event, trigger, player) {
+                            const list = [1, 2, 3].filter(num => !player.getStorage('wechatsanzui').includes(num) && player.getHp() !== num).map(num => [num, '将体力值调整至' + num])
+                            const result = await player.chooseButton(['三醉：你可以…', [list, 'textbutton']]).set('ai', button => {
+                                const player = get.player();
+                                const link = button.link;
+                                const hp = player.getHp();
+                                if (link == 1) return (hp < 1 || hp == 2) ? 1 : 0;
+                                else if (link == 2) return (hp < 2 || hp == 3) ? 1.5 : 0;
+                                return (hp < 3 || hp == 4) ? 2 : 0;
+                            }).forResult();
+                            if (result?.links?.length) {
+                                const link = result.links[0];
+                                game.broadcastAll(link => { lib.skill.wechatsanzui_backup.link = link }, link);
+                                await player.useSkill('wechatsanzui_backup');
+                            }
+                        },
+                    },
+                    backup: {
+                        audio: 'wechatsanzui',
+                        filterCard: () => false,
+                        selectCard: -1,
+                        async content(event, trigger, player) {
+                            const { link } = get.info('wechatsanzui_backup');
+                            player.setStorage('wechatsanzui', link, true);
+                            const color = get.hpColor(player);
+                            await lib.skill.wechatsanzui.colors[color].content(player);
+                        }
+                    },
+                    effect: {
+                        mod: {
+                            ignoredHandcard(card, player) {
+                                if (card.hasGaintag('wechatsanzui')) return true;
+                            },
+                            cardDiscardable(card, player, name) {
+                                if (name == 'phaseDiscard' && card.hasGaintag('wechatsanzui')) return false;
+                            },
+                        },
+                        locked: false,
+                        enable: ['chooseToUse', 'chooseToRespond'],
+                        filter(event, player) {
+                            if (['sha', 'shan'].every(name => !event.filterCard(get.autoViewAs({ name }, 'unsure'), player, event))) return false;
+                            return player.hasCards('h', card => card.hasGaintag('wechatsanzui'));
+                        },
+                        chooseButton: {
+                            dialog(event, player) {
+                                const list = ['sha', 'shan'].filter(name => event.filterCard(get.autoViewAs({ name }, 'unsure'), player, event)).map(name => ['基本', '', name]);
+                                const dialog = ui.create.dialog('三醉', [list, 'vcard']);
+                                dialog.direct = true;
+                                return dialog;
+                            },
+                            check(button) {
+                                const player = _status.event.player;
+                                return _status.event.getParent().type === 'phase' ? player.getUseValue({ name: button.link[2] }) : 1;
+                            },
+                            backup(links, player) {
+                                return {
+                                    filterCard(card, player) {
+                                        return card.hasGaintag('wechatsanzui');
+                                    },
+                                    position: 'h',
+                                    popname: true,
+                                    viewAs: { name: links[0][2] },
+                                    ai1(card) {
+                                        return 6 - get.value(card);
+                                    },
+                                };
+                            },
+                            prompt(links) {
+                                return `将一张“三醉”牌当做【${get.translation(links[0][2])}】使用或打出`;
+                            },
+                        },
+                        ai: {
+                            respondSha: true,
+                            respondShan: true,
+                            skillTagFilter(player, tag, arg) {
+                                if (!player.hasCards('h', card => card.hasGaintag('wechatsanzui'))) return false;
+                            },
+                            order: 4,
+                            result: { player: 1 },
+                        },
+                    },
+                    record: {
+                        charlotte: true,
+                        onremove: true,
+                    },
+                }
+            },
+            wechatfuyu: {
+                audio: 'ext:活动武将/audio/skill:2',
+                trigger: { player: 'useCardToPlayer' },
+                filter(event, player) {
+                    if (get.is.convertedCard(event.card) || get.is.virtualCard(event.card)) return false;
+                    return event.targets.length == 1 && event.targets[0] == player;
+                },
+                prompt2(event, player) {
+                    let str = `取消你为${get.translation(event.card)}的目标。`;
+                    const colors = ['green', 'yellow', 'red'].filter(color => !player.getStorage('wechatsanzui_record').includes(color) && lib.skill.wechatsanzui.colors[color].filter(player));
+                    if (colors.length) {
+                        str += `然后你可以${colors.map(color => [color, lib.skill.wechatsanzui.colors[color].intro]).join('或')}。若你的勾玉颜色与所执行项的勾玉颜色相同，则你获得一张非伤害牌。`;
+                    }
+                    return str;
+                },
+                check(event, player) {
+                    let cancel = get.effect(player, event.card, event.player, player), name = event.card.name;
+                    const colors = ['green', 'yellow', 'red'].filter(color => !player.getStorage('wechatsanzui_record').includes(color) && lib.skill.wechatsanzui.colors[color].filter(player));
+                    if (cancel < 0) return true;
+                    if (!colors.length) return false;
+                    return colors.some(color => lib.skill.wechatsanzui.colors[color].ai_effect(player) > 0);
+                },
+                async content(event, trigger, player) {
+                    trigger.targets.remove(player);
+                    trigger.getParent().triggeredTargets1.remove(player);
+                    trigger.untrigger();
+                    const colors = ['green', 'yellow', 'red'].filter(color => !player.getStorage('wechatsanzui_record').includes(color) && lib.skill.wechatsanzui.colors[color].filter(player));
+                    if (!colors.length) return;
+                    const list = colors.map(color => [color, lib.skill.wechatsanzui.colors[color].intro]);
+                    const result = await player.chooseButton(['弗御：请选择一项执行', [colors, 'vcard']]).set('ai', button => {
+                        const player = get.player();
+                        const color = button.link;
+                        return lib.skill.wechatsanzui.colors[color].ai_effect(player);
+                    }, true).set('direct', true).forResult();
+                    if (result?.bool) {
+                        const color = result.links[0];
+                        await lib.skill.wechatsanzui.colors[color].content(player);
+                        if (get.hpColor(player) == color) {
+                            const card = get.cardPile(card => !get.is.damageCard(card));
+                            if (card) await player.gain(card, 'gain2');
+                        }
+                    }
+                },
             },
         },
         dynamicTranslate: {
@@ -26543,6 +26807,13 @@ const packs = function () {
             wechatzhaoshi_info: `出牌阶段各限一次，你可以：1.交给一名其他角色一张手牌，若此牌为其手牌中点数最大的牌，则其可以将此牌当【杀】使用；2.令一名角色获得另一名角色一张手牌，若此牌为其后者手牌中点数最大的牌，则前者可以将此牌当【杀】使用。`,
             wechatjueju: '绝裾',
             wechatjueju_info: '每轮限一次，当你进入濒死时，你可以观看一名其他角色的手牌并分配其中至多一张红色牌。若如此做，本回合其他角色不能对你使用【桃】。',
+            wechat_zhi_zhenji: '志甄姬',
+            wechatyishuang: '宜霜',
+            wechatyishuang_info: '结束阶段，你可以令任意名勾玉颜色与你相同的角色失去1点体力。',
+            wechatsanzui: '三醉',
+            wechatsanzui_info: '出牌阶段限一次或当你受到伤害后，你可以将体力值调整至1-3中的本局未选择的一个值，然后你可以根据你的勾玉颜色执行对应项：绿色，你摸三张牌；黄色，视为使用一张手牌中的基本牌或普通锦囊牌（无次数限制）；红色，令当前手牌中的【杀】不计入手牌上限且可以当作【杀】或【闪】使用。',
+            wechatfuyu: '弗御',
+            wechatfuyu_info: `当你使用非转化且非虚拟牌指定自己为唯一目标时，你可以取消之，然后你执行${get.poptip('wechatsanzui')}中本回合未执行过的一项。若你的勾玉颜色与所执行项的勾玉颜色相同，则你获得一张非伤害牌。`,
 
             // ----------------------- 台词部分 ----------------------- //
             '#ext:活动武将/audio/skill/wechatzhongxin1': '苍生之愿，即贫道所愿也。',
