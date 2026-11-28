@@ -35115,7 +35115,7 @@ const packs = function () {
                         if (get.suit(card) == 'heart' && get.name(card) == 'sha') return true;
                     },
                 },
-                group: 'miniwushen_wusheng',
+                group: ['miniwushen_wusheng', 'miniwushen_draw'],
                 audio: 'wushen',
                 trigger: { source: 'damageBegin1' },
                 forced: true,
@@ -35164,19 +35164,39 @@ const packs = function () {
                             },
                         },
                     },
+                    draw: {
+                        audio: 'wushen',
+                        trigger: { player: 'useCardAfter' },
+                        forced: true,
+                        locked: false,
+                        filter(event, player) {
+                            return event.card.name == 'sha' && get.suit(event.card) == 'heart' && !player.hasHistory('sourceDamage', evt => evt.card == event.card);
+                        },
+                        async content(event, trigger, player) {
+                            await player.draw();
+                            if (trigger.addCount !== false) {
+                                trigger.addCount = false;
+                                const stat = trigger.player.getStat().card;
+                                const name = trigger.card.name;
+                                if (typeof stat[name] === 'number') stat[name]--;
+                                game.log(trigger.card, '不计入次数限制');
+                            }
+                        },
+                    }
                 },
             },
             miniwuhun: {
                 audio: 'wuhun2',
                 group: ['miniwuhun_mark', 'miniwuhun_die'],
-                trigger: { player: 'damageEnd' },
-                filter(event, player) {
-                    return event.source && event.source.isIn();
+                trigger: { player: 'damageEnd', source: 'damageSource' },
+                filter(event, player, name) {
+                    const target = name == 'damageEnd' ? event.source : event.player;
+                    return target?.isIn();
                 },
                 forced: true,
-                logTarget: 'source',
+                logTarget: (event, player, name) => name == 'damageEnd' ? event.source : event.player,
                 content() {
-                    trigger.source.addMark('miniwuhun_mark', trigger.num);
+                    targets[0].addMark('miniwuhun_mark', trigger.num);
                 },
                 subSkill: {
                     die: {
@@ -50549,9 +50569,9 @@ const packs = function () {
             miniguixin: '归心',
             miniguixin_info: '当你受到1点伤害后，你可以随机获得所有其他角色区域一张牌，若你本次以此法获得的牌不少于五张且你正面向上，你翻面。',
             miniwushen: '武神',
-            miniwushen_info: '你可以将红桃手牌视为【杀】使用或打出；你使用红桃【杀】无距离限制且造成的伤害+1。',
+            miniwushen_info: '你可以将红桃手牌视为【杀】使用或打出；你使用红桃【杀】无距离限制且造成的伤害+1，若未造成伤害，则你摸一张牌且令此【杀】不计入次数限制。',
             miniwuhun: '武魂',
-            miniwuhun_info: '锁定技，当你受到伤害后，伤害来源获得X个“梦魇”标记（X为伤害点数）。锁定技，当你死亡或脱离濒死时，你选择一名“梦魇”标记数量最多的其他角色，令该角色进行判定：若判定结果不为【桃】或【桃园结义】，则该角色失去5点体力。',
+            miniwuhun_info: '锁定技，当你造成/受到伤害后，你令受伤角色/伤害来源获得X个“梦魇”标记（X为伤害点数）。锁定技，当你死亡或脱离濒死时，你选择一名“梦魇”标记数量最多的其他角色，令该角色进行判定：若判定结果不为【桃】或【桃园结义】，则该角色失去5点体力。',
             miniqinyin: '琴音',
             miniqinyin_info: '弃牌阶段结束时，若你于此阶段内弃置过牌，则你可以选择一项：1. 令所有角色各回复1点体力；2. 令所有角色各失去1点体力；3.令所有角色各摸一张牌。',
             miniyeyan: '业炎',

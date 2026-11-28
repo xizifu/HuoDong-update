@@ -312,7 +312,7 @@ const packs = function () {
             wechat_zhi_yanghu: ['male', 'wei', 4, ['wechatsuigong', 'wechatyuansi', 'wechatyilve']],
             wechat_zhi_jiaxu: ['male', 'qun', 3, ['wechatruping', 'wechatjueyi']],
             wechat_zhi_xiahouhui: ['female', 'wei', 3, ['wechatjieqing', 'wechatxhhxiangzhi', 'wechatzheyuan'], ['name:夏侯|徽']],
-            wechat_hua_zhenji: ['female', 'wei', 3, ['wechatyishuang', 'wechatsanzui', 'wechatfuyu'], ['name:甄|宓', 'unseen']],
+            wechat_hua_zhenji: ['female', 'wei', 3, ['wechatyishuang', 'wechatsanzui', 'wechatfuyu'], ['name:甄|宓']],
             //限时武将
             wechat_nailong: ['male', 'qun', 4, ['wechatdunshi', 'wechattanchi']],
             wechat_mashe: ['male', 'qun', 4, ['wechatgenggeng', 'wechattanpai']],
