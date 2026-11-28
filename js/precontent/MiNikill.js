@@ -35310,9 +35310,10 @@ const packs = function () {
                 forced: true,
                 content() {
                     'step 0'
+                    const num = Math.min(5, Math.max(2, player.getDamagedHp()));
                     var list = [
-                        '失去1点体力并摸两张牌，本回合你的红色手牌均视为火杀且无距离限制',
-                        '减1点体力上限，本回合你的黑色手牌均视为雷杀且无使用次数限制'
+                        `失去1点体力并摸${get.cnNumber(num)}张牌，本回合你的红色手牌均视为火杀且无距离限制`,
+                        '减1点体力上限，本回合你的黑色手牌均视为雷杀且无使用次数限制，本回合结束时，若本回合有角色死亡，你增加1点体力上限'
                     ];
                     player.chooseControl().set('choiceList', list).set('ai', function () {
                         if (player.countCards() <= 3 && player.maxHp - player.hp <= 1) return 0;
@@ -35321,7 +35322,8 @@ const packs = function () {
                     'step 1'
                     if (result.index == 0) {
                         player.loseHp();
-                        player.draw(2);
+                        const num = Math.min(5, Math.max(2, player.getDamagedHp()));
+                        player.draw(num);
                         player.addTempSkill('minilongnu_1');
                     }
                     else {
@@ -35350,6 +35352,7 @@ const packs = function () {
                                 },
                             },
                         },
+                        charlotte: true,
                     },
                     '2': {
                         mod: {
@@ -35371,6 +35374,16 @@ const packs = function () {
                                 },
                             },
                         },
+                        charlotte: true,
+                        audio: 'minilongnu',
+                        trigger: { global: 'phaseEnd' },
+                        filter(event, player) {
+                            return game.hasGlobalHistory('everything', evt => evt.name == 'die');
+                        },
+                        forced: true,
+                        async content(event, trigger, player) {
+                            await player.gainMaxHp();
+                        },
                     },
                 },
                 ai: {
@@ -35390,6 +35403,10 @@ const packs = function () {
                         target(card, player, target) {
                             if (card.name == 'tiesuo' && target.isLinked()) return 'zeroplayertarget';
                         },
+                    },
+                    viewHandcard: true,
+                    skillTagFilter(player, arg, target) {
+                        return target.isLinked();
                     },
                 },
                 global: 'minijieying_all',
@@ -50577,9 +50594,9 @@ const packs = function () {
             miniyeyan: '业炎',
             miniyeyan_info: '出牌阶段开始时，你可以对一名其他角色造成1点火焰伤害。',
             minilongnu: '龙怒',
-            minilongnu_info: '锁定技，出牌阶段开始时，你须选择一项：①失去1点体力并摸两张牌，本回合你的红色手牌均视为无距离限制的火【杀】； ②减1点体力上限，本回合你的黑色手牌均视为无次数限制的雷【杀】。',
+            minilongnu_info: '锁定技，出牌阶段开始时，你须选择一项：①失去1点体力并摸X张牌，本回合你的红色手牌均视为无距离限制的火【杀】（X为你的已损失体力值且至少为2，至多为5）；②减1点体力上限，本回合你的黑色手牌均视为无次数限制的雷【杀】，本回合结束时，若本回合有角色死亡，你增加1点体力上限。',
             minijieying: '结营',
-            minijieying_info: '锁定技，游戏开始时或当你的武将牌重置时，你横置；所有已横置的角色手牌上限+2；结束阶段，你可以横置一名其他角色。当你受到伤害时，你摸一张牌。',
+            minijieying_info: '锁定技，游戏开始时或当你的武将牌重置时，你横置；所有已横置的角色手牌对你可见且手牌上限+2；结束阶段，你可以横置一名其他角色。当你受到伤害时，你摸一张牌。',
             miniduorui: '夺锐',
             miniduorui_info: '出牌阶段开始时，你可以选择一名其他角色，观看并获得其一张手牌，然后本回合你使用该颜色的牌，其不能响应，若此颜色的牌对其造成伤害，则随机废弃其一个装备栏。当你受到伤害时，伤害来源恢复所有因此技能而废弃的装备栏，你摸等量的牌。',
             minizhiti: '止啼',
