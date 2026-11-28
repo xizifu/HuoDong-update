@@ -64,8 +64,9 @@ const packs = function () {
                 wechat_zhi_sui: ['zhushixing', 'xushi', 'sunquan'].map(i => `wechat_zhi_${i}`),
                 wechat_zhi_bei: ['caojie', 'caocao'].map(i => `wechat_zhi_${i}`),
                 wechat_zhi_han: ['fuhuanghou', 'zhangjiao'].map(i => `wechat_zhi_${i}`),
-                wechat_zhi: ['zhenji', 'xiahouhui', 'liubiao', 'caozhi', 'old_yuanshu', 'caopi', 'liubei', 'yuanshu', 'yanghu', 'jiaxu'].map(i => `wechat_zhi_${i}`),
+                wechat_zhi: ['xiahouhui', 'liubiao', 'caozhi', 'old_yuanshu', 'caopi', 'liubei', 'yuanshu', 'yanghu', 'jiaxu'].map(i => `wechat_zhi_${i}`),
                 wechat_shengzhiyifa: ['shuxueyazhouren', 'yuwenyuejuanren', 'baixiang', 'hema', 'gaoluji', 'mashe', 'yingjiang', 'yuehanniu', 'luotuo', 'hansimao', 'dihuangxia', 'yanlongxia', 'nailong'].map(i => `wechat_${i}`),//任何答辩，终将绳之以法！！！！！
+                wechat_hua: ['zhenji'].map(i => `wechat_hua_${i}`),
             },
         },
         character: {
@@ -311,7 +312,7 @@ const packs = function () {
             wechat_zhi_yanghu: ['male', 'wei', 4, ['wechatsuigong', 'wechatyuansi', 'wechatyilve']],
             wechat_zhi_jiaxu: ['male', 'qun', 3, ['wechatruping', 'wechatjueyi']],
             wechat_zhi_xiahouhui: ['female', 'wei', 3, ['wechatjieqing', 'wechatxhhxiangzhi', 'wechatzheyuan'], ['name:夏侯|徽']],
-            wechat_zhi_zhenji: ['female', 'wei', 3, ['wechatyishuang', 'wechatsanzui', 'wechatfuyu'], ['name:甄|宓', 'unseen']],
+            wechat_hua_zhenji: ['female', 'wei', 3, ['wechatyishuang', 'wechatsanzui', 'wechatfuyu'], ['name:甄|宓', 'unseen']],
             //限时武将
             wechat_nailong: ['male', 'qun', 4, ['wechatdunshi', 'wechattanchi']],
             wechat_mashe: ['male', 'qun', 4, ['wechatgenggeng', 'wechattanpai']],
@@ -25605,6 +25606,7 @@ const packs = function () {
             wechat_zhi_han: '小程序·憾志',
             wechat_zhi: '小程序·志·未分包',
             wechat_shengzhiyifa: '小程序·限时武将',
+            wechat_hua: '小程序·花',
             //武将
             wechat_menghuo: '小程序孟获',
             wechathuoshou: '祸首',
@@ -26807,7 +26809,7 @@ const packs = function () {
             wechatzhaoshi_info: `出牌阶段各限一次，你可以：1.交给一名其他角色一张手牌，若此牌为其手牌中点数最大的牌，则其可以将此牌当【杀】使用；2.令一名角色获得另一名角色一张手牌，若此牌为其后者手牌中点数最大的牌，则前者可以将此牌当【杀】使用。`,
             wechatjueju: '绝裾',
             wechatjueju_info: '每轮限一次，当你进入濒死时，你可以观看一名其他角色的手牌并分配其中至多一张红色牌。若如此做，本回合其他角色不能对你使用【桃】。',
-            wechat_zhi_zhenji: '志甄姬',
+            wechat_hua_zhenji: '花甄姬',
             wechatyishuang: '宜霜',
             wechatyishuang_info: '结束阶段，你可以令任意名勾玉颜色与你相同的角色失去1点体力。',
             wechatsanzui: '三醉',
@@ -27169,6 +27171,7 @@ const packs = function () {
             else if (WeChatkill.translate[i].startsWith('小程序') || WeChatkill.translate[i + '_ab']?.startsWith('小程序')) WeChatkill.translate[i + '_prefix'] = '小程序';
             else if (WeChatkill.translate[i].startsWith('极')) WeChatkill.translate[i + '_prefix'] = '极';
             else if (WeChatkill.translate[i].startsWith('志')) WeChatkill.translate[i + '_prefix'] = '志';
+            else if (WeChatkill.translate[i].startsWith('花')) WeChatkill.translate[i + '_prefix'] = '花';
         }
     }
     lib.namePrefix.set('极', {
@@ -27176,6 +27179,10 @@ const packs = function () {
     });
     lib.namePrefix.set('志', {
         color: '#b9b4edff',
+    });
+    lib.namePrefix.set('花', {
+        color: '#f868c8',
+        showName: '🌹',
     });
     lib.namePrefix.set('小程序', {
         color: '#00cd00',
